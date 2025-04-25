@@ -1,3 +1,4 @@
-FROM mcr.microsoft.com/devcontainers/go:1-1.24-bookworm
+FROM golang:1.24-bookworm
 
-RUN apt update && apt install git
+ENV TERM=xterm-256color
+RUN echo "PS1='\e[92m\w\e[0m# '" >> /root/.bashrc
