@@ -1,4 +1,4 @@
-name: Pull Request
+name: Quality of Code
 
 on:
   push:
@@ -9,16 +9,12 @@ on:
       - master
 
 jobs:
-  ci:
-    permissions:
-      contents: read
-      pull-requests: read
+  quality-of-code:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Go
-        uses: actions/setup-go@v5
+      - uses: actions/setup-go@v5
         with:
           go-version-file: "go.mod"
 
@@ -26,9 +22,7 @@ jobs:
         run: go vet ./...
 
       - name: Linting
-        uses: dominikh/staticcheck-action@v1.3.1
-        with:
-          version: "2025.1.1"
+        run: go tool staticcheck ./...
 
       - name: Tests
-        run: go test -v ./...
+        run: go test ./...

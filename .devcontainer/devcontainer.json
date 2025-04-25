@@ -8,5 +8,16 @@
     },
     "mounts": [
         "source=.,target=/git-backups,type=bind,consistency=cached"
-    ]
+    ],
+    "runArgs": [
+        "--name",
+        "git-backups-dev-env"
+    ],
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "golang.Go"
+            ]
+        }
+    }
 }
