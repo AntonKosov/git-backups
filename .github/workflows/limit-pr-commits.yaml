@@ -8,5 +8,7 @@ on:
 jobs:
   limit-pr-commits:
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
     steps:
       - uses: AntonKosov/limit-pr-commits-action@v1.0.4
