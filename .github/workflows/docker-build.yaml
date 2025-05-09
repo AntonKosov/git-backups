@@ -36,7 +36,8 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
+          file: ./build/release/dockerfile
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ steps.extract_tag.outputs.TAG }}
-            ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:latest
+            ghcr.io/antonkosov/git-backups:${{ steps.extract_tag.outputs.TAG }}
+            ghcr.io/antonkosov/git-backups:latest
