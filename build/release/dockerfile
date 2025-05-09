@@ -1,0 +1,20 @@
+FROM golang:1.24-bookworm AS builder
+
+WORKDIR /app
+
+COPY . .
+
+RUN CGO_ENABLED=0 go build -ldflags="-w -s" -o git-backups ./cmd/git-backups
+
+
+FROM alpine:latest
+
+WORKDIR /app
+
+COPY --from=builder /app/git-backups .
+
+RUN addgroup -S appuser && adduser -S appuser -G appuser
+RUN chown appuser:appuser /app/git-backups
+USER appuser
+
+ENTRYPOINT ["./git-backups"]
