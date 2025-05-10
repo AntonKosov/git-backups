@@ -1,10 +1,8 @@
-name: Build and Push Docker Image
+name: Build and Push Docker Images
 
 on:
-  workflow_dispatch:
-  push:
-    tags:
-      - 'v*'
+  release:
+    types: [created]
 
 permissions:
   contents: read
@@ -28,16 +26,13 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract tag name
-        id: extract_tag
-        run: echo "TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
-
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
           context: .
           file: ./build/release/dockerfile
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: |
-            ghcr.io/antonkosov/git-backups:${{ steps.extract_tag.outputs.TAG }}
+            ghcr.io/antonkosov/git-backups:${{ github.event.release.tag_name }}
             ghcr.io/antonkosov/git-backups:latest
