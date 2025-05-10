@@ -13,10 +13,13 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      pull-requests: write
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout the Code
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-go@v5
+      - name: Setup Go
+        uses: actions/setup-go@v5
         with:
           go-version-file: "go.mod"
 
@@ -27,4 +30,14 @@ jobs:
         run: go tool staticcheck ./...
 
       - name: Tests
-        run: go test ./...
+        run: go test -coverprofile=coverage.report ./...
+      
+      - name: Filter the Coverage Report
+        run: grep -v 'fakes/fake_' coverage.report > coverage.filtered.report
+      
+      - name: Report Coveralls
+        uses: coverallsapp/github-action@v2
+        with:
+          file: coverage.filtered.report
+          format: golang
+          compare-ref: master
