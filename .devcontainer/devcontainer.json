@@ -3,12 +3,13 @@
     "build": {
         "dockerfile": "dockerfile",
         "args": {
-            "REBUILD_TRIGGER": "2025-05-07"
+            "REBUILD_TRIGGER": "2025-06-20"
         }
     },
     "mounts": [
         "source=.,target=/git-backups,type=bind,consistency=cached"
     ],
+    "postCreateCommand": ".devcontainer/post_create.sh",
     "runArgs": [
         "--name",
         "git-backups-dev-env"
