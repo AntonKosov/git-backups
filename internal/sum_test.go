@@ -1,18 +1,28 @@
 package internal_test
 
 import (
-	"testing"
-
 	"github.com/AntonKosov/git-backups/internal"
 	"github.com/AntonKosov/git-backups/internal/internalfakes"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 )
 
-func TestSum(t *testing.T) {
-	fakeTransformer := internalfakes.FakeTransformer{}
-	fakeTransformer.TransformStub = func(v int) int { return v * 10 }
+var _ = Describe("Sum tests", func() {
+	var (
+		fakeTransformer internalfakes.FakeTransformer
+		sum             int
+	)
 
-	result := internal.Sum(2, 3, &fakeTransformer)
-	if result != 50 {
-		t.Errorf("Sum(2, 3, x10) = %v", result)
-	}
-}
+	BeforeEach(func() {
+		fakeTransformer = internalfakes.FakeTransformer{}
+		fakeTransformer.TransformStub = func(v int) int { return v * 10 }
+	})
+
+	JustBeforeEach(func() {
+		sum = internal.Sum(2, 3, &fakeTransformer)
+	})
+
+	It("returns the correct sum", func() {
+		Expect(sum).To(Equal(50))
+	})
+})
