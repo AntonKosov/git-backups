@@ -1,7 +1,12 @@
 package main
 
-import "fmt"
+import (
+	"context"
+
+	"github.com/AntonKosov/git-backups/internal/cmd"
+)
 
 func main() {
-	fmt.Println("Hello world!")
+	ctx := context.Background()
+	cmd.Execute(ctx, "git", "status")
 }
