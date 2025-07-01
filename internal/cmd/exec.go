@@ -7,6 +7,8 @@ import (
 	"log/slog"
 	"os/exec"
 	"strings"
+
+	"github.com/AntonKosov/git-backups/internal/clog"
 )
 
 type CommandError struct {
@@ -20,7 +22,8 @@ func (ce CommandError) Error() string {
 }
 
 func Execute(ctx context.Context, name string, args ...string) error {
-	slog.DebugContext(ctx, "Executing application", "name", name, "args", args)
+	ctx = clog.Add(ctx, "name", name, "args", args)
+	slog.DebugContext(ctx, "Executing application")
 	command := exec.Command(name, args...)
 
 	var stderr strings.Builder
@@ -32,6 +35,6 @@ func Execute(ctx context.Context, name string, args ...string) error {
 		return err
 	}
 
-	slog.DebugContext(ctx, "Successfully ran application", "name", name, "args", args)
+	slog.DebugContext(ctx, "Successfully ran application")
 	return nil
 }
