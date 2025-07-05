@@ -3,7 +3,7 @@
     "build": {
         "dockerfile": "dockerfile",
         "args": {
-            "REBUILD_TRIGGER": "2025-06-20"
+            "REBUILD_TRIGGER": "2025-07-03"
         }
     },
     "mounts": [

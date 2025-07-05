@@ -7,6 +7,7 @@ import (
 
 	"github.com/AntonKosov/git-backups/internal/clog"
 	"github.com/AntonKosov/git-backups/internal/cmd"
+	"github.com/AntonKosov/git-backups/internal/git"
 )
 
 func main() {
@@ -15,4 +16,6 @@ func main() {
 	ctx := context.Background()
 
 	cmd.Execute(ctx, "git", "status")
+	git.Clone(ctx, "test.url", "this/is/path")
+	// cmd.Execute(ctx, "git", "status")
 }

@@ -1,4 +1,4 @@
-package cmd_test
+package git_test
 
 import (
 	"io"
@@ -9,8 +9,8 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestCmd(t *testing.T) {
+func TestGit(t *testing.T) {
 	slog.SetDefault(slog.New(slog.NewTextHandler(io.Discard, nil)))
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Cmd Suite")
+	RunSpecs(t, "Git Suite")
 }
