@@ -30,7 +30,11 @@ jobs:
         run: go tool staticcheck ./...
 
       - name: Tests
-        run: go test -coverprofile=coverage.report ./...
+        run: |
+          mkdir -p $TMP_DIR
+          go test -coverprofile=coverage.report ./...
+        env:
+          TMP_DIR: ${{ runner.workspace }}/tmp
       
       - name: Filter the Coverage Report
         run: grep -v 'fakes/fake_' coverage.report > coverage.filtered.report

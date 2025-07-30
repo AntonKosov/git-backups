@@ -23,7 +23,7 @@ func (ce CommandError) Error() string {
 
 func Execute(ctx context.Context, name string, args ...string) error {
 	ctx = clog.Add(ctx, "name", name, "args", args)
-	slog.DebugContext(ctx, "Executing application")
+	slog.DebugContext(ctx, "Executing application...")
 	command := exec.Command(name, args...)
 
 	var stderr strings.Builder
