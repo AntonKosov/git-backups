@@ -3,8 +3,11 @@
     "build": {
         "dockerfile": "dockerfile",
         "args": {
-            "REBUILD_TRIGGER": "2025-06-20"
+            "REBUILD_TRIGGER": "2025-07-31"
         }
+    },
+    "containerEnv": {
+        "TMP_DIR": "/workspaces/tmp"
     },
     "mounts": [
         "source=.,target=/git-backups,type=bind,consistency=cached"

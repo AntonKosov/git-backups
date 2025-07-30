@@ -1,6 +1,8 @@
 package clog_test
 
 import (
+	"io"
+	"log/slog"
 	"testing"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -8,6 +10,7 @@ import (
 )
 
 func TestClog(t *testing.T) {
+	slog.SetDefault(slog.New(slog.NewTextHandler(io.Discard, nil)))
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Clog Suite")
 }
