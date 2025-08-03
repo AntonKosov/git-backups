@@ -3,6 +3,17 @@ FROM golang:1.24-bookworm
 RUN go install golang.org/x/tools/gopls@latest
 RUN go install github.com/go-delve/delve/cmd/dlv@latest
 
-RUN apt update && apt install unzip
+RUN apt update && apt install -y unzip sudo
 
 RUN echo "PS1='\[\e[1;32m\]\w\[\e[0m\] # '" >> /root/.bashrc
+
+ARG USERNAME
+ARG USER_UID=1000
+ARG USER_GID=$USER_UID
+
+RUN groupadd --gid $USER_GID $USERNAME \
+  && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME
+
+RUN echo "$USERNAME ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
+USER $USERNAME

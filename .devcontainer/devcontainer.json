@@ -3,10 +3,13 @@
     "build": {
         "dockerfile": "dockerfile",
         "args": {
-            "REBUILD_TRIGGER": "2025-07-31"
+            "REBUILD_TRIGGER": "2025-08-02",
+            "USERNAME": "devuser"
         }
     },
+    "remoteUser": "devuser",
     "containerEnv": {
+        "SHELL": "/bin/bash",
         "TMP_DIR": "/workspaces/tmp"
     },
     "mounts": [
