@@ -1,7 +1,6 @@
 package git_test
 
 import (
-	"context"
 	"fmt"
 	"os"
 	"os/exec"
@@ -23,10 +22,10 @@ var _ = Describe("Git tests", func() {
 	)
 
 	var (
-		ctx        context.Context
 		err        error
 		sourcePath string
 		targetPath string
+		worker     git.Git
 	)
 
 	mkdir := func(name string) {
@@ -67,8 +66,6 @@ var _ = Describe("Git tests", func() {
 	}
 
 	BeforeEach(func() {
-		ctx = context.Background()
-
 		sourcePath = mkdirTemp("source")
 		targetPath = mkdirTemp("target")
 
@@ -95,7 +92,7 @@ var _ = Describe("Git tests", func() {
 		})
 
 		JustBeforeEach(func() {
-			err = git.Clone(ctx, source, targetPath)
+			err = worker.Clone(ctx, source, targetPath)
 		})
 
 		It("does not return an error", func() {
@@ -120,12 +117,12 @@ var _ = Describe("Git tests", func() {
 	Context("Fetch", func() {
 		BeforeEach(func() {
 			unzipArchive(secondCommitArchive)
-			err := git.Clone(ctx, sourcePath, targetPath)
+			err := worker.Clone(ctx, sourcePath, targetPath)
 			Expect(err).NotTo(HaveOccurred())
 		})
 
 		JustBeforeEach(func() {
-			err = git.Fetch(ctx, targetPath)
+			err = worker.Fetch(ctx, targetPath)
 		})
 
 		It("does not return an error", func() {
