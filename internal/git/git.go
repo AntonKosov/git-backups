@@ -8,7 +8,10 @@ import (
 	"github.com/AntonKosov/git-backups/internal/cmd"
 )
 
-func Clone(ctx context.Context, url, path string) error {
+type Git struct {
+}
+
+func (g Git) Clone(ctx context.Context, url, path string) error {
 	ctx = clog.Add(ctx, "URL", url, "path", path)
 	slog.InfoContext(ctx, "Cloning repository...")
 
@@ -22,7 +25,7 @@ func Clone(ctx context.Context, url, path string) error {
 	return nil
 }
 
-func Fetch(ctx context.Context, path string) error {
+func (g Git) Fetch(ctx context.Context, path string) error {
 	ctx = clog.Add(ctx, "path", path)
 	slog.InfoContext(ctx, "Fetching repository...")
 

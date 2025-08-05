@@ -1,6 +1,7 @@
 package git_test
 
 import (
+	"context"
 	"io"
 	"log/slog"
 	"testing"
@@ -9,8 +10,14 @@ import (
 	. "github.com/onsi/gomega"
 )
 
+var ctx context.Context
+
 func TestGit(t *testing.T) {
 	slog.SetDefault(slog.New(slog.NewTextHandler(io.Discard, nil)))
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Git Suite")
 }
+
+var _ = BeforeEach(func() {
+	ctx = context.Background()
+})
