@@ -6,3 +6,29 @@
 
 
 🚧 Under Development...
+
+`config.yaml`
+
+```yaml
+version: 1
+
+repositories:
+  # It is not implemented yet
+  generic:
+    - category: "category name"
+      root_folder: "/home/user/git_backup/folder_name"
+      targets:
+        - url: "https://github.com/Username1/repo_name_1.git"
+          folder: "repo_folder_name_1"
+        - url: "https://github.com/Username2/repo_name_2.git"
+          folder: "repo_folder_name_2"
+  # It is not implemented yet
+  github:
+    - category: "category name 2"
+      root_folder: "/home/user/git_backup/folder_name_2"
+      token: "GH_XXX"
+      # 'include' is optional, only repositories listed in this field will be included
+      include: ["repo_name_1", "repo_name_2"]
+      # 'exclude' is optional, repositories which are listed here will NOT be included (even if they are listed in the 'include' field)
+      exclude: ["repo_name_3"]
+```

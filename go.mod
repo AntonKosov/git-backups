@@ -9,6 +9,7 @@ tool (
 )
 
 require (
+	github.com/goccy/go-yaml v1.18.0
 	github.com/onsi/ginkgo/v2 v2.23.4
 	github.com/onsi/gomega v1.37.0
 )
