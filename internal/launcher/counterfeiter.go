@@ -1,3 +1,3 @@
-package git
+package launcher
 
 //go:generate go tool counterfeiter -generate

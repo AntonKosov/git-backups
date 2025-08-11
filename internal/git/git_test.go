@@ -15,8 +15,8 @@ import (
 
 var _ = Describe("Git tests", func() {
 	const (
-		firstCommitArchive  = "./test_data/first_commit.zip"
-		secondCommitArchive = "./test_data/second_commit.zip"
+		firstCommitArchive  = "../../test/data/first_commit.zip"
+		secondCommitArchive = "../../test/data/second_commit.zip"
 		firstCommitID       = "07b22a94cd460978cb91aec6c1b8967973996f3e"
 		secondCommitID      = "c95f9eee1bf80bd9ffa198efd239599365cefa40"
 	)
