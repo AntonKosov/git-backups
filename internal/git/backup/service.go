@@ -1,4 +1,4 @@
-package git
+package backup
 
 import (
 	"context"
@@ -9,21 +9,21 @@ import (
 	"github.com/AntonKosov/git-backups/internal/clog"
 )
 
-//counterfeiter:generate . GitWorker
-type GitWorker interface {
+//counterfeiter:generate . Git
+type Git interface {
 	Clone(ctx context.Context, url, path string) error
 	Fetch(ctx context.Context, path string) error
 }
 
-type Fetcher struct {
-	worker GitWorker
+type Service struct {
+	git Git
 }
 
-func NewFetcher(worker GitWorker) Fetcher {
-	return Fetcher{worker: worker}
+func NewService(git Git) Service {
+	return Service{git: git}
 }
 
-func (f Fetcher) Run(ctx context.Context, url, targetFolder string) error {
+func (s Service) Run(ctx context.Context, url, targetFolder string) error {
 	ctx = clog.Add(ctx, "URL", url, "target folder", targetFolder)
 	exists, err := folderExists(targetFolder)
 	if err != nil {
@@ -32,10 +32,10 @@ func (f Fetcher) Run(ctx context.Context, url, targetFolder string) error {
 	}
 
 	if exists {
-		return f.worker.Fetch(ctx, targetFolder)
+		return s.git.Fetch(ctx, targetFolder)
 	}
 
-	return f.worker.Clone(ctx, url, targetFolder)
+	return s.git.Clone(ctx, url, targetFolder)
 }
 
 func folderExists(folder string) (bool, error) {

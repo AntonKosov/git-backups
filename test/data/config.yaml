@@ -1,0 +1,29 @@
+version: 1
+
+repositories:
+  generic:
+    - profile: "profile name"
+      root_folder: "/home/user/git_backup/folder_name"
+      targets:
+        - url: "https://github.com/Username1/repo_name_1.git"
+          folder: "repo_folder_name_1"
+        - url: "https://github.com/Username2/repo_name_2.git"
+          folder: "repo_folder_name_2"
+    - profile: "profile name 2"
+      root_folder: "/home/user/git_backup/folder_name_2"
+      targets:
+        - url: "https://github.com/Username3/repo_name_3.git"
+          folder: "repo_folder_name_3"
+        - url: "https://github.com/Username4/repo_name_4.git"
+          folder: "repo_folder_name_4"
+  github:
+    - profile: "profile name 3"
+      root_folder: "/home/user/git_backup/folder_name_3"
+      token: "GH_XXX"
+      include: ["repo_name_1", "repo_name_2"]
+      exclude: ["repo_name_3"]
+    - profile: "profile name 4"
+      root_folder: "/home/user/git_backup/folder_name_4"
+      token: "GH2_XXX"
+      include: ["repo_name_4", "repo_name_5"]
+      exclude: ["repo_name_6"]
