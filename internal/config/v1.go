@@ -21,11 +21,12 @@ type target struct {
 }
 
 type gitHub struct {
-	Name       string   `yaml:"profile"`
-	RootFolder string   `yaml:"root_folder"`
-	Token      string   `yaml:"token"`
-	Include    []string `yaml:"include"`
-	Exclude    []string `yaml:"exclude"`
+	Name        string   `yaml:"profile"`
+	RootFolder  string   `yaml:"root_folder"`
+	Affiliation string   `yaml:"affiliation"`
+	Token       string   `yaml:"token"`
+	Include     []string `yaml:"include"`
+	Exclude     []string `yaml:"exclude"`
 }
 
 func (v v1) transform() Config {
