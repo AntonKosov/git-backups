@@ -21,9 +21,10 @@ type GenericTarget struct {
 }
 
 type GitHubRepo struct {
-	Name       string
-	RootFolder string
-	Token      string
-	Include    []string
-	Exclude    []string
+	Name        string
+	RootFolder  string
+	Affiliation string
+	Token       string
+	Include     []string
+	Exclude     []string
 }

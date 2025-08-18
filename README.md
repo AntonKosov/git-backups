@@ -13,7 +13,6 @@
 version: 1
 
 repositories:
-  # It is not implemented yet
   generic:
     - profile: "profile name"
       root_folder: "/home/user/git_backup/folder_name"
@@ -22,10 +21,11 @@ repositories:
           folder: "repo_folder_name_1"
         - url: "https://github.com/Username2/repo_name_2.git"
           folder: "repo_folder_name_2"
-  # It is not implemented yet
   github:
     - profile: "profile name 2"
       root_folder: "/home/user/git_backup/folder_name_2"
+      # Specify ownership of repositories to back up. One or more values should be provided
+      affiliation: "owner,collaborator,organization_member"
       token: "GH_XXX"
       # 'include' is optional, only repositories listed in this field will be included
       include: ["repo_name_1", "repo_name_2"]

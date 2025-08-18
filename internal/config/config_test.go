@@ -63,9 +63,10 @@ var _ = Describe("Config tests", func() {
 				},
 				GitHub: []config.GitHubRepo{
 					{
-						Name:       "profile name 3",
-						RootFolder: "/home/user/git_backup/folder_name_3",
-						Token:      "GH_XXX",
+						Name:        "profile name 3",
+						RootFolder:  "/home/user/git_backup/folder_name_3",
+						Affiliation: "owner,collaborator,organization_member",
+						Token:       "GH_XXX",
 						Include: []string{
 							"repo_name_1",
 							"repo_name_2",
@@ -75,9 +76,10 @@ var _ = Describe("Config tests", func() {
 						},
 					},
 					{
-						Name:       "profile name 4",
-						RootFolder: "/home/user/git_backup/folder_name_4",
-						Token:      "GH2_XXX",
+						Name:        "profile name 4",
+						RootFolder:  "/home/user/git_backup/folder_name_4",
+						Affiliation: "owner",
+						Token:       "GH2_XXX",
 						Include: []string{
 							"repo_name_4",
 							"repo_name_5",
