@@ -27,7 +27,10 @@ type jsonRepo struct {
 	CloneURL string `json:"clone_url"`
 }
 
-func AllRepos(ctx context.Context, token, affiliation string) iter.Seq2[Repo, error] {
+type Reader struct {
+}
+
+func (r Reader) AllRepos(ctx context.Context, token, affiliation string) iter.Seq2[Repo, error] {
 	return func(yield func(Repo, error) bool) {
 		for page := 1; ; page++ {
 			repos, err := readPage(ctx, affiliation, token, page)

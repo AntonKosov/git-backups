@@ -26,7 +26,7 @@ var _ = Describe("Reader tests", func() {
 	})
 
 	JustBeforeEach(func() {
-		allRepos = github.AllRepos(ctx, "GH_XXX", "owner")
+		allRepos = github.Reader{}.AllRepos(ctx, "GH_XXX", "owner")
 	})
 
 	It("correctly reads one page of repositories", func() {

@@ -9,6 +9,7 @@ import (
 	"github.com/AntonKosov/git-backups/internal/config"
 	"github.com/AntonKosov/git-backups/internal/git"
 	"github.com/AntonKosov/git-backups/internal/git/backup"
+	"github.com/AntonKosov/git-backups/internal/github"
 	"github.com/AntonKosov/git-backups/internal/launcher"
 )
 
@@ -23,7 +24,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	err = launcher.Run(ctx, conf, backup.NewService(git.Git{}))
+	err = launcher.Run(ctx, conf, backup.NewService(git.Git{}), github.Reader{})
 	if err != nil {
 		slog.ErrorContext(ctx, "Failed to backup", "error", err)
 		os.Exit(1)
