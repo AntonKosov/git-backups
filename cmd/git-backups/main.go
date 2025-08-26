@@ -4,6 +4,8 @@ import (
 	"context"
 	"log/slog"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/AntonKosov/git-backups/internal/clog"
 	"github.com/AntonKosov/git-backups/internal/config"
@@ -16,7 +18,15 @@ import (
 func main() {
 	h := clog.NewHandler(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
 	slog.SetDefault(slog.New(h))
-	ctx := context.Background()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	termSig := make(chan os.Signal, 1)
+	signal.Notify(termSig, syscall.SIGINT, syscall.SIGTERM)
+	go func() {
+		sig := <-termSig
+		slog.InfoContext(ctx, "Terminating app...", "signal", sig)
+		cancel()
+	}()
 
 	conf, err := config.ReadConfig("config.yaml")
 	if err != nil {
