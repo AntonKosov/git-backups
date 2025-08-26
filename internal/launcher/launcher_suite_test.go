@@ -10,7 +10,10 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var ctx context.Context
+var (
+	ctx       context.Context
+	ctxCancel context.CancelFunc
+)
 
 func TestLauncher(t *testing.T) {
 	slog.SetDefault(slog.New(slog.NewTextHandler(io.Discard, nil)))
@@ -19,5 +22,5 @@ func TestLauncher(t *testing.T) {
 }
 
 var _ = BeforeEach(func() {
-	ctx = context.Background()
+	ctx, ctxCancel = context.WithCancel(context.Background())
 })

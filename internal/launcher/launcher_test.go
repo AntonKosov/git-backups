@@ -1,6 +1,7 @@
 package launcher_test
 
 import (
+	"context"
 	"errors"
 
 	"github.com/AntonKosov/git-backups/internal/config"
@@ -294,6 +295,50 @@ var _ = Describe("Launcher tests", func() {
 			_, url, path := fakeBackupService.RunArgsForCall(4)
 			Expect(url).To(Equal("https://oauth2:GH2_XXX@github.com/GH_Username2/repo_name_4.git"))
 			Expect(path).To(Equal("/home/user/git_backup/folder_name_4/GH_Username2/repo_name_4"))
+		})
+	})
+
+	When("generic context is canceled", func() {
+		BeforeEach(func() {
+			numCalls := 0
+			fakeBackupService.RunStub = func(context.Context, string, string) error {
+				numCalls++
+				if numCalls == 3 {
+					ctxCancel()
+				}
+
+				return nil
+			}
+		})
+
+		It("returns an error", func() {
+			Expect(err).To(MatchError(context.Canceled))
+		})
+
+		It("was terminated", func() {
+			Expect(fakeBackupService.RunCallCount()).To(Equal(3))
+		})
+	})
+
+	When("GitHub context is canceled", func() {
+		BeforeEach(func() {
+			numCalls := 0
+			fakeBackupService.RunStub = func(context.Context, string, string) error {
+				numCalls++
+				if numCalls == 6 {
+					ctxCancel()
+				}
+
+				return nil
+			}
+		})
+
+		It("returns an error", func() {
+			Expect(err).To(MatchError(context.Canceled))
+		})
+
+		It("was terminated", func() {
+			Expect(fakeBackupService.RunCallCount()).To(Equal(6))
 		})
 	})
 })

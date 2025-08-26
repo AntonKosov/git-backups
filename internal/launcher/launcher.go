@@ -47,11 +47,16 @@ func backupGeneric(ctx context.Context, genericConf []config.GenericRepo, backup
 	for _, profile := range genericConf {
 		ctx := clog.Add(ctx, "profile", profile)
 		for _, target := range profile.Targets {
-			targetPath := path.Join(profile.RootFolder, target.Folder)
-			ctx := clog.Add(ctx, "URL", target.URL, "Target folder", targetPath)
-			if err := backupService.Run(ctx, target.URL, targetPath); err != nil {
-				slog.ErrorContext(ctx, "Failed to backup", "error", err)
-				return err
+			select {
+			case <-ctx.Done():
+				return context.Canceled
+			default:
+				targetPath := path.Join(profile.RootFolder, target.Folder)
+				ctx := clog.Add(ctx, "URL", target.URL, "Target folder", targetPath)
+				if err := backupService.Run(ctx, target.URL, targetPath); err != nil {
+					slog.ErrorContext(ctx, "Failed to backup", "error", err)
+					return err
+				}
 			}
 		}
 	}
@@ -75,17 +80,22 @@ func backupGitHub(ctx context.Context, githubConf []config.GitHubRepo, backupSer
 				return err
 			}
 
-			ctx := clog.Add(ctx, "repo", repo.Name)
+			select {
+			case <-ctx.Done():
+				return context.Canceled
+			default:
+				ctx := clog.Add(ctx, "repo", repo.Name)
 
-			urlWithToken, err := addTokenToGithubURL(repo.CloneURL, profile.Token)
-			if err != nil {
-				slog.ErrorContext(ctx, "Failed to add token to URL", "error", err)
-				return err
-			}
+				urlWithToken, err := addTokenToGithubURL(repo.CloneURL, profile.Token)
+				if err != nil {
+					slog.ErrorContext(ctx, "Failed to add token to URL", "error", err)
+					return err
+				}
 
-			if err := backupService.Run(ctx, urlWithToken, path.Join(profile.RootFolder, repo.Owner, repo.Name)); err != nil {
-				slog.ErrorContext(ctx, "Failed to backup", "error", err)
-				return err
+				if err := backupService.Run(ctx, urlWithToken, path.Join(profile.RootFolder, repo.Owner, repo.Name)); err != nil {
+					slog.ErrorContext(ctx, "Failed to backup", "error", err)
+					return err
+				}
 			}
 		}
 	}
