@@ -11,16 +11,19 @@ import (
 
 var _ = Describe("Exec tests", func() {
 	var (
-		err  error
-		args []string
+		err        error
+		readOutput bool
+		args       []string
+		output     string
 	)
 
 	BeforeEach(func() {
+		readOutput = false
 		args = nil
 	})
 
 	JustBeforeEach(func() {
-		err = cmd.Execute(context.Background(), "ls", args...)
+		output, err = cmd.Execute(context.Background(), readOutput, "ls", args...)
 	})
 
 	It("doesn't return an error", func() {
@@ -53,6 +56,21 @@ var _ = Describe("Exec tests", func() {
 				},
 				Err: "ls: cannot access 'non-existing-folder': No such file or directory\n",
 			}))
+		})
+	})
+
+	When("app returns correct output", func() {
+		BeforeEach(func() {
+			readOutput = true
+			args = nil
+		})
+
+		It("doesn't return an error", func() {
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		It("returns correct output", func() {
+			Expect(output).To(ContainSubstring("exec_test.go"))
 		})
 	})
 })

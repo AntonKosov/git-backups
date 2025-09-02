@@ -3,7 +3,6 @@ package git_test
 import (
 	"fmt"
 	"os"
-	"os/exec"
 	"strings"
 	"time"
 
@@ -46,11 +45,16 @@ var _ = Describe("Git tests", func() {
 	}
 
 	verifyID := func(expected string) {
-		var stdout strings.Builder
-		command := exec.Command("git", "-C", targetPath, "rev-list", "HEAD", "-1")
-		command.Stdout = &stdout
-		Expect(command.Run()).NotTo(HaveOccurred())
-		Expect(stdout.String()).To(Equal(expected + "\n"))
+		output, err := cmd.Execute(ctx, true, "git", "-C", targetPath, "rev-list", "FETCH_HEAD", "-1")
+		if err != nil {
+			if !strings.Contains(err.Error(), "ambiguous argument 'FETCH_HEAD'") {
+				Fail("Unexpected error " + err.Error())
+			}
+			output, err = cmd.Execute(ctx, true, "git", "-C", targetPath, "rev-list", "HEAD", "-1")
+		}
+
+		Expect(err).NotTo(HaveOccurred())
+		Expect(output).To(Equal(expected + "\n"))
 	}
 
 	clearSource := func() {
@@ -58,10 +62,10 @@ var _ = Describe("Git tests", func() {
 		mkdir(sourcePath)
 	}
 
-	unzipArchive := func(archive string) {
+	unzipArchiveToSource := func(archive string) {
 		clearSource()
 
-		err := cmd.Execute(ctx, "unzip", archive, "-d", sourcePath)
+		_, err := cmd.Execute(ctx, false, "unzip", archive, "-d", sourcePath)
 		Expect(err).NotTo(HaveOccurred())
 	}
 
@@ -69,7 +73,7 @@ var _ = Describe("Git tests", func() {
 		sourcePath = mkdirTemp("source")
 		targetPath = mkdirTemp("target")
 
-		unzipArchive(firstCommitArchive)
+		unzipArchiveToSource(firstCommitArchive)
 	})
 
 	AfterEach(func() {
@@ -116,9 +120,9 @@ var _ = Describe("Git tests", func() {
 
 	Context("Fetch", func() {
 		BeforeEach(func() {
-			unzipArchive(secondCommitArchive)
 			err := worker.Clone(ctx, sourcePath, targetPath)
 			Expect(err).NotTo(HaveOccurred())
+			unzipArchiveToSource(secondCommitArchive)
 		})
 
 		JustBeforeEach(func() {
@@ -140,6 +144,79 @@ var _ = Describe("Git tests", func() {
 
 			It("returns an error", func() {
 				Expect(err.Error()).To(ContainSubstring(`fatal: Could not read from remote repository.`))
+			})
+		})
+	})
+
+	Context("GetRemoteURL", func() {
+		var (
+			remoteURL string
+			path      string
+		)
+
+		BeforeEach(func() {
+			err := worker.Clone(ctx, sourcePath, targetPath)
+			Expect(err).NotTo(HaveOccurred())
+			path = targetPath
+		})
+
+		JustBeforeEach(func() {
+			remoteURL, err = worker.GetRemoteURL(ctx, path)
+		})
+
+		It("does not return an error", func() {
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		It("returns correct remote URL", func() {
+			Expect(remoteURL).To(Equal(sourcePath))
+		})
+
+		When("command returns an error", func() {
+			BeforeEach(func() {
+				path = "./non/existing/path"
+			})
+
+			It("returns an error", func() {
+				Expect(err.Error()).To(ContainSubstring("No such file or directory"))
+			})
+		})
+	})
+
+	Context("SetRemoteURL", func() {
+		const newURL = "https://new_url.com"
+		var (
+			remoteURL string
+			path      string
+		)
+
+		BeforeEach(func() {
+			err := worker.Clone(ctx, sourcePath, targetPath)
+			Expect(err).NotTo(HaveOccurred())
+			path = targetPath
+		})
+
+		JustBeforeEach(func() {
+			err = worker.SetRemoteURL(ctx, path, newURL)
+		})
+
+		It("does not return an error", func() {
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		It("returns correct remote URL", func() {
+			remoteURL, err = worker.GetRemoteURL(ctx, targetPath)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(remoteURL).To(Equal(newURL))
+		})
+
+		When("command returns an error", func() {
+			BeforeEach(func() {
+				path = "./non/existing/path"
+			})
+
+			It("returns an error", func() {
+				Expect(err.Error()).To(ContainSubstring("No such file or directory"))
 			})
 		})
 	})
