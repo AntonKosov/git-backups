@@ -207,7 +207,16 @@ var _ = Describe("Launcher tests", func() {
 		})
 
 		It("returns an error", func() {
-			Expect(err).To(MatchError("something went wrong"))
+			Expect(err.Error()).To(ContainSubstring("failed to backup repository https://github.com/Username1/repo_name_1.git from profile profile name: something went wrong"))
+			Expect(err.Error()).To(ContainSubstring("failed to backup repository https://github.com/Username2/repo_name_2.git from profile profile name: something went wrong"))
+			Expect(err.Error()).To(ContainSubstring("failed to backup repository https://github.com/Username3/repo_name_3.git from profile profile name 2: something went wrong"))
+			Expect(err.Error()).To(ContainSubstring("failed to backup repository https://github.com/Username4/repo_name_4.git from profile profile name 2: something went wrong"))
+			Expect(err.Error()).To(ContainSubstring("failed to backup repository https://github.com/GH_Username1/repo_name_1.git from profile profile name 3: something went wrong"))
+			Expect(err.Error()).To(ContainSubstring("failed to backup repository https://github.com/GH_Username1/repo_name_2.git from profile profile name 3: something went wrong"))
+			Expect(err.Error()).To(ContainSubstring("failed to backup repository https://github.com/GH_Username2/repo_name_4.git from profile profile name 4: something went wrong"))
+			Expect(err.Error()).To(ContainSubstring("failed to backup repository https://github.com/GH_Username2/repo_name_5.git from profile profile name 4: something went wrong"))
+			Expect(err.Error()).To(ContainSubstring("failed to backup repository https://github.com/GH_Username3/repo_name_7.git from profile profile name 5: something went wrong"))
+			Expect(err.Error()).To(ContainSubstring("failed to backup repository https://github.com/GH_Username4/repo_name_9.git from profile profile name 6: something went wrong"))
 		})
 	})
 
@@ -219,7 +228,7 @@ var _ = Describe("Launcher tests", func() {
 		})
 
 		It("returns an error", func() {
-			Expect(err).To(MatchError("something went wrong"))
+			Expect(err.Error()).To(ContainSubstring("failed to read repositories: something went wrong"))
 		})
 	})
 
@@ -235,7 +244,7 @@ var _ = Describe("Launcher tests", func() {
 		})
 
 		It("returns an error", func() {
-			Expect(err).To(MatchError("unexpected URL prefix"))
+			Expect(err.Error()).To(ContainSubstring("failed to add token to clone URL not_https://github.com/GH_Username1/repo_name_1.git from profile profile name 3: unexpected URL prefix"))
 		})
 	})
 
@@ -245,7 +254,7 @@ var _ = Describe("Launcher tests", func() {
 		})
 
 		It("returns an error", func() {
-			Expect(err).To(MatchError("something went wrong"))
+			Expect(err.Error()).To(ContainSubstring("failed to backup repository https://github.com/GH_Username1/repo_name_1.git from profile profile name 3: something went wrong"))
 		})
 	})
 

@@ -28,43 +28,37 @@ type ReaderService interface {
 func Run(ctx context.Context, conf config.Config, backupService BackupService, readerService ReaderService) error {
 	slog.InfoContext(ctx, "Beginning to backup generic repositories...")
 	err := backupGeneric(ctx, conf.Repositories.Generic, backupService)
-	if err != nil {
-		return err
-	}
 	slog.InfoContext(ctx, "Backed up generic repositories")
 
 	slog.InfoContext(ctx, "Beginning to backup github repositories...")
-	err = backupGitHub(ctx, conf.Repositories.GitHub, backupService, readerService)
-	if err != nil {
-		return err
-	}
+	err = errors.Join(err, backupGitHub(ctx, conf.Repositories.GitHub, backupService, readerService))
 	slog.InfoContext(ctx, "Backed up github repositories")
 
-	return nil
+	return err
 }
 
-func backupGeneric(ctx context.Context, genericConf []config.GenericRepo, backupService BackupService) error {
+func backupGeneric(ctx context.Context, genericConf []config.GenericRepo, backupService BackupService) (backupErrors error) {
 	for _, profile := range genericConf {
 		ctx := clog.Add(ctx, "profile", profile)
 		for _, target := range profile.Targets {
 			select {
 			case <-ctx.Done():
-				return context.Canceled
+				return errors.Join(backupErrors, context.Canceled)
 			default:
 				targetPath := path.Join(profile.RootFolder, target.Folder)
 				ctx := clog.Add(ctx, "URL", target.URL, "Target folder", targetPath)
 				if err := backupService.Run(ctx, target.URL, targetPath); err != nil {
 					slog.ErrorContext(ctx, "Failed to backup", "error", err)
-					return err
+					backupErrors = errors.Join(backupErrors, fmt.Errorf("failed to backup repository %v from profile %v: %w", target.URL, profile.Name, err))
 				}
 			}
 		}
 	}
 
-	return nil
+	return backupErrors
 }
 
-func backupGitHub(ctx context.Context, githubConf []config.GitHubRepo, backupService BackupService, readerService ReaderService) error {
+func backupGitHub(ctx context.Context, githubConf []config.GitHubRepo, backupService BackupService, readerService ReaderService) (backupErrors error) {
 	for _, profile := range githubConf {
 		ctx := clog.Add(ctx, "profile", profile)
 		repos := include(
@@ -77,29 +71,32 @@ func backupGitHub(ctx context.Context, githubConf []config.GitHubRepo, backupSer
 		for repo, err := range repos {
 			if err != nil {
 				slog.ErrorContext(ctx, "Failed to read repositories", "error", err)
-				return err
+				backupErrors = errors.Join(backupErrors, errors.Join(backupErrors, fmt.Errorf("failed to read repositories: %w", err)))
+				break
 			}
 
 			select {
 			case <-ctx.Done():
-				return context.Canceled
+				return errors.Join(backupErrors, context.Canceled)
 			default:
 				ctx := clog.Add(ctx, "repo", repo.Name)
 
 				urlWithToken, err := addTokenToGithubURL(repo.CloneURL, profile.Token)
 				if err != nil {
 					slog.ErrorContext(ctx, "Failed to add token to URL", "error", err)
-					return err
+					backupErrors = errors.Join(backupErrors, fmt.Errorf("failed to add token to clone URL %v from profile %v: %w", repo.CloneURL, profile.Name, err))
+					break
 				}
 
 				if err := backupService.Run(ctx, urlWithToken, path.Join(profile.RootFolder, repo.Owner, repo.Name)); err != nil {
 					slog.ErrorContext(ctx, "Failed to backup", "error", err)
-					return err
+					backupErrors = errors.Join(backupErrors, fmt.Errorf("failed to backup repository %v from profile %v: %w", repo.CloneURL, profile.Name, err))
 				}
 			}
 		}
 	}
-	return nil
+
+	return backupErrors
 }
 
 func include(toInclude []string, repos iter.Seq2[github.Repo, error]) iter.Seq2[github.Repo, error] {
@@ -132,6 +129,7 @@ func exclude(toExclude []string, repos iter.Seq2[github.Repo, error]) iter.Seq2[
 	}
 
 	excludeMap := slice.Lookup(toExclude, func(name string) (string, bool) { return strings.ToLower(name), true })
+
 	return func(yield func(github.Repo, error) bool) {
 		for repo, err := range repos {
 			if err != nil {
