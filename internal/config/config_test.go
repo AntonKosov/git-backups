@@ -30,8 +30,8 @@ var _ = Describe("Config tests", func() {
 
 	It("parses config correctly", func() {
 		Expect(conf).To(Equal(config.Config{
-			Repositories: config.Repositories{
-				Generic: []config.GenericRepo{
+			Profiles: config.Profiles{
+				GenericProfiles: []config.GenericProfile{
 					{
 						Name:       "profile name",
 						RootFolder: "/home/user/git_backup/folder_name",
@@ -61,7 +61,7 @@ var _ = Describe("Config tests", func() {
 						},
 					},
 				},
-				GitHub: []config.GitHubRepo{
+				GitHubProfiles: []config.GitHubProfile{
 					{
 						Name:        "profile name 3",
 						RootFolder:  "/home/user/git_backup/folder_name_3",

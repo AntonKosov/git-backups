@@ -9,12 +9,13 @@ import (
 )
 
 type FakeGit struct {
-	CloneStub        func(context.Context, string, string) error
+	CloneStub        func(context.Context, string, string, *string) error
 	cloneMutex       sync.RWMutex
 	cloneArgsForCall []struct {
 		arg1 context.Context
 		arg2 string
 		arg3 string
+		arg4 *string
 	}
 	cloneReturns struct {
 		result1 error
@@ -22,11 +23,12 @@ type FakeGit struct {
 	cloneReturnsOnCall map[int]struct {
 		result1 error
 	}
-	FetchStub        func(context.Context, string) error
+	FetchStub        func(context.Context, string, *string) error
 	fetchMutex       sync.RWMutex
 	fetchArgsForCall []struct {
 		arg1 context.Context
 		arg2 string
+		arg3 *string
 	}
 	fetchReturns struct {
 		result1 error
@@ -65,20 +67,21 @@ type FakeGit struct {
 	invocationsMutex sync.RWMutex
 }
 
-func (fake *FakeGit) Clone(arg1 context.Context, arg2 string, arg3 string) error {
+func (fake *FakeGit) Clone(arg1 context.Context, arg2 string, arg3 string, arg4 *string) error {
 	fake.cloneMutex.Lock()
 	ret, specificReturn := fake.cloneReturnsOnCall[len(fake.cloneArgsForCall)]
 	fake.cloneArgsForCall = append(fake.cloneArgsForCall, struct {
 		arg1 context.Context
 		arg2 string
 		arg3 string
-	}{arg1, arg2, arg3})
+		arg4 *string
+	}{arg1, arg2, arg3, arg4})
 	stub := fake.CloneStub
 	fakeReturns := fake.cloneReturns
-	fake.recordInvocation("Clone", []interface{}{arg1, arg2, arg3})
+	fake.recordInvocation("Clone", []interface{}{arg1, arg2, arg3, arg4})
 	fake.cloneMutex.Unlock()
 	if stub != nil {
-		return stub(arg1, arg2, arg3)
+		return stub(arg1, arg2, arg3, arg4)
 	}
 	if specificReturn {
 		return ret.result1
@@ -92,17 +95,17 @@ func (fake *FakeGit) CloneCallCount() int {
 	return len(fake.cloneArgsForCall)
 }
 
-func (fake *FakeGit) CloneCalls(stub func(context.Context, string, string) error) {
+func (fake *FakeGit) CloneCalls(stub func(context.Context, string, string, *string) error) {
 	fake.cloneMutex.Lock()
 	defer fake.cloneMutex.Unlock()
 	fake.CloneStub = stub
 }
 
-func (fake *FakeGit) CloneArgsForCall(i int) (context.Context, string, string) {
+func (fake *FakeGit) CloneArgsForCall(i int) (context.Context, string, string, *string) {
 	fake.cloneMutex.RLock()
 	defer fake.cloneMutex.RUnlock()
 	argsForCall := fake.cloneArgsForCall[i]
-	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3
+	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3, argsForCall.arg4
 }
 
 func (fake *FakeGit) CloneReturns(result1 error) {
@@ -128,19 +131,20 @@ func (fake *FakeGit) CloneReturnsOnCall(i int, result1 error) {
 	}{result1}
 }
 
-func (fake *FakeGit) Fetch(arg1 context.Context, arg2 string) error {
+func (fake *FakeGit) Fetch(arg1 context.Context, arg2 string, arg3 *string) error {
 	fake.fetchMutex.Lock()
 	ret, specificReturn := fake.fetchReturnsOnCall[len(fake.fetchArgsForCall)]
 	fake.fetchArgsForCall = append(fake.fetchArgsForCall, struct {
 		arg1 context.Context
 		arg2 string
-	}{arg1, arg2})
+		arg3 *string
+	}{arg1, arg2, arg3})
 	stub := fake.FetchStub
 	fakeReturns := fake.fetchReturns
-	fake.recordInvocation("Fetch", []interface{}{arg1, arg2})
+	fake.recordInvocation("Fetch", []interface{}{arg1, arg2, arg3})
 	fake.fetchMutex.Unlock()
 	if stub != nil {
-		return stub(arg1, arg2)
+		return stub(arg1, arg2, arg3)
 	}
 	if specificReturn {
 		return ret.result1
@@ -154,17 +158,17 @@ func (fake *FakeGit) FetchCallCount() int {
 	return len(fake.fetchArgsForCall)
 }
 
-func (fake *FakeGit) FetchCalls(stub func(context.Context, string) error) {
+func (fake *FakeGit) FetchCalls(stub func(context.Context, string, *string) error) {
 	fake.fetchMutex.Lock()
 	defer fake.fetchMutex.Unlock()
 	fake.FetchStub = stub
 }
 
-func (fake *FakeGit) FetchArgsForCall(i int) (context.Context, string) {
+func (fake *FakeGit) FetchArgsForCall(i int) (context.Context, string, *string) {
 	fake.fetchMutex.RLock()
 	defer fake.fetchMutex.RUnlock()
 	argsForCall := fake.fetchArgsForCall[i]
-	return argsForCall.arg1, argsForCall.arg2
+	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3
 }
 
 func (fake *FakeGit) FetchReturns(result1 error) {

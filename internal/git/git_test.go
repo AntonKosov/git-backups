@@ -45,16 +45,27 @@ var _ = Describe("Git tests", func() {
 	}
 
 	verifyID := func(expected string) {
-		output, err := cmd.Execute(ctx, true, "git", "-C", targetPath, "rev-list", "FETCH_HEAD", "-1")
+		var output strings.Builder
+		err := cmd.Execute(
+			ctx,
+			"git",
+			cmd.WithArguments("-C", targetPath, "rev-list", "FETCH_HEAD", "-1"),
+			cmd.WithStdoutWriter(&output),
+		)
 		if err != nil {
 			if !strings.Contains(err.Error(), "ambiguous argument 'FETCH_HEAD'") {
 				Fail("Unexpected error " + err.Error())
 			}
-			output, err = cmd.Execute(ctx, true, "git", "-C", targetPath, "rev-list", "HEAD", "-1")
+			err = cmd.Execute(
+				ctx,
+				"git",
+				cmd.WithArguments("-C", targetPath, "rev-list", "HEAD", "-1"),
+				cmd.WithStdoutWriter(&output),
+			)
+			Expect(err).NotTo(HaveOccurred())
 		}
 
-		Expect(err).NotTo(HaveOccurred())
-		Expect(output).To(Equal(expected + "\n"))
+		Expect(output.String()).To(Equal(expected + "\n"))
 	}
 
 	clearSource := func() {
@@ -65,7 +76,7 @@ var _ = Describe("Git tests", func() {
 	unzipArchiveToSource := func(archive string) {
 		clearSource()
 
-		_, err := cmd.Execute(ctx, false, "unzip", archive, "-d", sourcePath)
+		err := cmd.Execute(ctx, "unzip", cmd.WithArguments(archive, "-d", sourcePath))
 		Expect(err).NotTo(HaveOccurred())
 	}
 
@@ -89,14 +100,18 @@ var _ = Describe("Git tests", func() {
 	})
 
 	Context("Clone", func() {
-		var source string
+		var (
+			source        string
+			privateSSHKey *string
+		)
 
 		BeforeEach(func() {
 			source = sourcePath
+			privateSSHKey = nil
 		})
 
 		JustBeforeEach(func() {
-			err = worker.Clone(ctx, source, targetPath)
+			err = worker.Clone(ctx, source, targetPath, privateSSHKey)
 		})
 
 		It("does not return an error", func() {
@@ -116,17 +131,31 @@ var _ = Describe("Git tests", func() {
 				Expect(err.Error()).To(ContainSubstring("missing_path' does not exist"))
 			})
 		})
+
+		When("a private SSH key is provided", func() {
+			BeforeEach(func() {
+				path := "/path/to/private/ssh/key"
+				privateSSHKey = &path
+			})
+
+			It("does not return an error", func() {
+				Expect(err).NotTo(HaveOccurred())
+			})
+		})
 	})
 
 	Context("Fetch", func() {
+		var privateSSHKey *string
+
 		BeforeEach(func() {
-			err := worker.Clone(ctx, sourcePath, targetPath)
+			privateSSHKey = nil
+			err := worker.Clone(ctx, sourcePath, targetPath, privateSSHKey)
 			Expect(err).NotTo(HaveOccurred())
 			unzipArchiveToSource(secondCommitArchive)
 		})
 
 		JustBeforeEach(func() {
-			err = worker.Fetch(ctx, targetPath)
+			err = worker.Fetch(ctx, targetPath, nil)
 		})
 
 		It("does not return an error", func() {
@@ -146,6 +175,17 @@ var _ = Describe("Git tests", func() {
 				Expect(err.Error()).To(ContainSubstring(`fatal: Could not read from remote repository.`))
 			})
 		})
+
+		When("a private SSH key is provided", func() {
+			BeforeEach(func() {
+				path := "/path/to/private/ssh/key"
+				privateSSHKey = &path
+			})
+
+			It("does not return an error", func() {
+				Expect(err).NotTo(HaveOccurred())
+			})
+		})
 	})
 
 	Context("GetRemoteURL", func() {
@@ -155,7 +195,7 @@ var _ = Describe("Git tests", func() {
 		)
 
 		BeforeEach(func() {
-			err := worker.Clone(ctx, sourcePath, targetPath)
+			err := worker.Clone(ctx, sourcePath, targetPath, nil)
 			Expect(err).NotTo(HaveOccurred())
 			path = targetPath
 		})
@@ -191,7 +231,7 @@ var _ = Describe("Git tests", func() {
 		)
 
 		BeforeEach(func() {
-			err := worker.Clone(ctx, sourcePath, targetPath)
+			err := worker.Clone(ctx, sourcePath, targetPath, nil)
 			Expect(err).NotTo(HaveOccurred())
 			path = targetPath
 		})

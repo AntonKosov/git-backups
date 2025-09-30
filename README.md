@@ -12,7 +12,7 @@
 ```yaml
 version: 1
 
-repositories:
+profiles:
   generic:
     - profile: "profile name"
       root_folder: "/home/user/git_backup/folder_name"

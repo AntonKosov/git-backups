@@ -32,9 +32,24 @@ var _ = Describe("Reader tests", func() {
 	It("correctly reads one page of repositories", func() {
 		repos := maps.Collect(allRepos)
 		Expect(repos).To(Equal(map[github.Repo]error{
-			{Name: "Repo1Name", Owner: "User", CloneURL: "https://Repo1Url.com"}: nil,
-			{Name: "Repo2Name", Owner: "User", CloneURL: "https://Repo2Url.com"}: nil,
-			{Name: "Repo3Name", Owner: "User", CloneURL: "https://Repo3Url.com"}: nil,
+			{
+				Name:     "Repo1Name",
+				Owner:    "User",
+				CloneURL: "https://Repo1Url.com",
+				GitURL:   "git:github.com/repo-owner1/hello-world.git",
+			}: nil,
+			{
+				Name:     "Repo2Name",
+				Owner:    "User",
+				CloneURL: "https://Repo2Url.com",
+				GitURL:   "git:github.com/repo-owner2/hello-world.git",
+			}: nil,
+			{
+				Name:     "Repo3Name",
+				Owner:    "User",
+				CloneURL: "https://Repo3Url.com",
+				GitURL:   "git:github.com/repo-owner3/hello-world.git",
+			}: nil,
 		}))
 	})
 
@@ -84,6 +99,7 @@ var _ = Describe("Reader tests", func() {
 					Name:     fmt.Sprintf("Repo%vName", i),
 					Owner:    "User",
 					CloneURL: fmt.Sprintf("https://Repo%vUrl.com", i),
+					GitURL:   fmt.Sprintf("git:github.com/repo-owner%v/hello-world.git", i),
 				}))
 
 				i++
@@ -104,7 +120,12 @@ func generateResponseJSON(first, last int) string {
 			sb.WriteString(`,`)
 		}
 
-		sb.WriteString(fmt.Sprintf(`{"name": "Repo%[1]vName","owner": {"login": "User"},"clone_url": "https://Repo%[1]vUrl.com"}`, i))
+		sb.WriteString(fmt.Sprintf(`{
+			"name": "Repo%[1]vName",
+			"owner": {"login": "User"},
+			"clone_url": "https://Repo%[1]vUrl.com",
+			"git_url": "git:github.com/repo-owner%[1]v/hello-world.git"
+		}`, i))
 	}
 
 	sb.WriteString(`]`)
