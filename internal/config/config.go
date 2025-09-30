@@ -1,18 +1,19 @@
 package config
 
 type Config struct {
-	Repositories Repositories
+	Profiles Profiles
 }
 
-type Repositories struct {
-	Generic []GenericRepo
-	GitHub  []GitHubRepo
+type Profiles struct {
+	GenericProfiles []GenericProfile
+	GitHubProfiles  []GitHubProfile
 }
 
-type GenericRepo struct {
-	Name       string
-	RootFolder string
-	Targets    []GenericTarget
+type GenericProfile struct {
+	Name          string
+	RootFolder    string
+	PrivateSSHKey *string
+	Targets       []GenericTarget
 }
 
 type GenericTarget struct {
@@ -20,11 +21,12 @@ type GenericTarget struct {
 	Folder string
 }
 
-type GitHubRepo struct {
-	Name        string
-	RootFolder  string
-	Affiliation string
-	Token       string
-	Include     []string
-	Exclude     []string
+type GitHubProfile struct {
+	Name          string
+	RootFolder    string
+	Affiliation   string
+	Token         string
+	PrivateSSHKey *string
+	Include       []string
+	Exclude       []string
 }

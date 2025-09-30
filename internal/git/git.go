@@ -2,6 +2,7 @@ package git
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"strings"
 
@@ -12,11 +13,17 @@ import (
 type Git struct {
 }
 
-func (g Git) Clone(ctx context.Context, url, path string) error {
+func (g Git) Clone(ctx context.Context, url, path string, privateSSHKey *string) error {
 	ctx = clog.Add(ctx, "URL", url, "path", path)
 	slog.InfoContext(ctx, "Cloning repository...")
 
-	if _, err := cmd.Execute(ctx, false, "git", "clone", "--bare", url, path); err != nil {
+	err := cmd.Execute(
+		ctx,
+		"git",
+		cmd.WithArguments("clone", "--bare", url, path),
+		sshKeyEnvVariableCommandOption(privateSSHKey),
+	)
+	if err != nil {
 		slog.ErrorContext(ctx, "Failed to clone", "error", err.Error())
 
 		return err
@@ -26,11 +33,17 @@ func (g Git) Clone(ctx context.Context, url, path string) error {
 	return nil
 }
 
-func (g Git) Fetch(ctx context.Context, path string) error {
+func (g Git) Fetch(ctx context.Context, path string, privateSSHKey *string) error {
 	ctx = clog.Add(ctx, "path", path)
 	slog.InfoContext(ctx, "Fetching repository...")
 
-	if _, err := cmd.Execute(ctx, false, "git", "-C", path, "--bare", "fetch"); err != nil {
+	err := cmd.Execute(
+		ctx,
+		"git",
+		cmd.WithArguments("-C", path, "--bare", "fetch"),
+		sshKeyEnvVariableCommandOption(privateSSHKey),
+	)
+	if err != nil {
 		slog.ErrorContext(ctx, "Failed to fetch", "error", err.Error())
 
 		return err
@@ -41,11 +54,33 @@ func (g Git) Fetch(ctx context.Context, path string) error {
 }
 
 func (g Git) GetRemoteURL(ctx context.Context, path string) (string, error) {
-	url, err := cmd.Execute(ctx, true, "git", "-C", path, "remote", "get-url", "origin")
-	return strings.Trim(url, " \n"), err
+	var url strings.Builder
+	err := cmd.Execute(
+		ctx,
+		"git",
+		cmd.WithArguments("-C", path, "remote", "get-url", "origin"),
+		cmd.WithStdoutWriter(&url),
+	)
+
+	return strings.Trim(url.String(), " \n"), err
 }
 
 func (g Git) SetRemoteURL(ctx context.Context, path, url string) error {
-	_, err := cmd.Execute(ctx, false, "git", "-C", path, "remote", "set-url", "origin", url)
+	err := cmd.Execute(
+		ctx,
+		"git",
+		cmd.WithArguments("-C", path, "remote", "set-url", "origin", url),
+	)
+
 	return err
+}
+
+func sshKeyEnvVariableCommandOption(privateSSHKey *string) cmd.Option {
+	if privateSSHKey == nil {
+		return nil
+	}
+
+	return cmd.WithEnvVariables(
+		fmt.Sprintf(`GIT_SSH_COMMAND="ssh -i %v -o IdentitiesOnly=yes"`, *privateSSHKey),
+	)
 }

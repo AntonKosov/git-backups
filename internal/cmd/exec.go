@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"log/slog"
 	"os/exec"
 	"strings"
@@ -21,24 +22,60 @@ func (ce CommandError) Error() string {
 	return fmt.Sprintf(`%v failed with "%v" (args: %v)`, ce.Name, ce.Err, ce.Args)
 }
 
-func Execute(ctx context.Context, readOutput bool, name string, args ...string) (string, error) {
+type Options struct {
+	args         []string
+	envVariables []string
+	stdoutWriter io.Writer
+}
+
+type Option func(*Options)
+
+func WithArguments(args ...string) Option {
+	return func(o *Options) {
+		o.args = args
+	}
+}
+
+func WithEnvVariables(envVariables ...string) Option {
+	return func(o *Options) {
+		o.envVariables = envVariables
+	}
+}
+
+func WithStdoutWriter(writer io.Writer) Option {
+	return func(o *Options) {
+		o.stdoutWriter = writer
+	}
+}
+
+func Execute(ctx context.Context, name string, opts ...Option) error {
+	var options Options
+	for _, opt := range opts {
+		if opt != nil {
+			opt(&options)
+		}
+	}
+
+	args := options.args
+
 	ctx = clog.Add(ctx, "name", name, "args", args)
 	slog.DebugContext(ctx, "Executing application...")
 	command := exec.Command(name, args...)
 
 	var stderr strings.Builder
 	command.Stderr = &stderr
-	var stdout strings.Builder
-	if readOutput {
-		command.Stdout = &stdout
+	if w := options.stdoutWriter; w != nil {
+		command.Stdout = w
 	}
+
+	command.Env = options.envVariables
 
 	if err := command.Run(); err != nil {
 		err = errors.Join(err, CommandError{Name: name, Args: args, Err: stderr.String()})
 		slog.ErrorContext(ctx, "Failed to run application", "error", err.Error())
-		return "", err
+		return err
 	}
 
 	slog.DebugContext(ctx, "Successfully ran application")
-	return stdout.String(), nil
+	return nil
 }

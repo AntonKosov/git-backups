@@ -17,6 +17,7 @@ type Repo struct {
 	Name     string
 	Owner    string
 	CloneURL string
+	GitURL   string
 }
 
 type jsonRepo struct {
@@ -25,6 +26,7 @@ type jsonRepo struct {
 		Login string `json:"login"`
 	} `json:"owner"`
 	CloneURL string `json:"clone_url"`
+	GitURL   string `json:"git_url"`
 }
 
 type Reader struct {
@@ -41,7 +43,7 @@ func (r Reader) AllRepos(ctx context.Context, token, affiliation string) iter.Se
 			}
 
 			for _, repo := range repos {
-				if !yield(Repo{Name: repo.Name, Owner: repo.Owner.Login, CloneURL: repo.CloneURL}, nil) {
+				if !yield(Repo{Name: repo.Name, Owner: repo.Owner.Login, CloneURL: repo.CloneURL, GitURL: repo.GitURL}, nil) {
 					return
 				}
 			}

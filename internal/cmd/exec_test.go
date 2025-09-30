@@ -3,6 +3,7 @@ package cmd_test
 import (
 	"context"
 	"errors"
+	"strings"
 
 	"github.com/AntonKosov/git-backups/internal/cmd"
 	. "github.com/onsi/ginkgo/v2"
@@ -11,19 +12,18 @@ import (
 
 var _ = Describe("Exec tests", func() {
 	var (
-		err        error
-		readOutput bool
-		args       []string
-		output     string
+		err            error
+		executableApp  string
+		commandOptions []cmd.Option
 	)
 
 	BeforeEach(func() {
-		readOutput = false
-		args = nil
+		executableApp = "ls"
+		commandOptions = nil
 	})
 
 	JustBeforeEach(func() {
-		output, err = cmd.Execute(context.Background(), readOutput, "ls", args...)
+		err = cmd.Execute(context.Background(), executableApp, commandOptions...)
 	})
 
 	It("doesn't return an error", func() {
@@ -32,7 +32,7 @@ var _ = Describe("Exec tests", func() {
 
 	When("app has arguments", func() {
 		BeforeEach(func() {
-			args = []string{"-a"}
+			commandOptions = append(commandOptions, cmd.WithArguments("-a"))
 		})
 
 		It("doesn't return an error", func() {
@@ -42,7 +42,7 @@ var _ = Describe("Exec tests", func() {
 
 	When("app has incorrect arguments", func() {
 		BeforeEach(func() {
-			args = []string{"non-existing-folder"}
+			commandOptions = append(commandOptions, cmd.WithArguments("non-existing-folder"))
 		})
 
 		It("returns an error", func() {
@@ -60,9 +60,11 @@ var _ = Describe("Exec tests", func() {
 	})
 
 	When("app returns correct output", func() {
+		var stdout strings.Builder
+
 		BeforeEach(func() {
-			readOutput = true
-			args = nil
+			stdout = strings.Builder{}
+			commandOptions = append(commandOptions, cmd.WithStdoutWriter(&stdout))
 		})
 
 		It("doesn't return an error", func() {
@@ -70,7 +72,39 @@ var _ = Describe("Exec tests", func() {
 		})
 
 		It("returns correct output", func() {
-			Expect(output).To(ContainSubstring("exec_test.go"))
+			Expect(stdout.String()).To(ContainSubstring("exec_test.go"))
+		})
+	})
+
+	When("there are env variables", func() {
+		var stdout strings.Builder
+
+		BeforeEach(func() {
+			stdout = strings.Builder{}
+			executableApp = "env"
+			commandOptions = append(
+				commandOptions,
+				cmd.WithStdoutWriter(&stdout),
+				cmd.WithEnvVariables(`var1=1234`, `var2="value with spaces"`),
+			)
+		})
+
+		It("doesn't return an error", func() {
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		It("returns correct output", func() {
+			Expect(stdout.String()).To(Equal("var1=1234\nvar2=\"value with spaces\"\n"))
+		})
+	})
+
+	When("an option is nil", func() {
+		BeforeEach(func() {
+			commandOptions = append(commandOptions, nil)
+		})
+
+		It("doesn't return an error", func() {
+			Expect(err).NotTo(HaveOccurred())
 		})
 	})
 })

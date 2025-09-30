@@ -17,7 +17,7 @@ import (
 
 //counterfeiter:generate . BackupService
 type BackupService interface {
-	Run(ctx context.Context, url, targetFolder string) error
+	Run(ctx context.Context, url, targetFolder string, privateSSHKey *string) error
 }
 
 //counterfeiter:generate . ReaderService
@@ -27,18 +27,18 @@ type ReaderService interface {
 
 func Run(ctx context.Context, conf config.Config, backupService BackupService, readerService ReaderService) error {
 	slog.InfoContext(ctx, "Beginning to backup generic repositories...")
-	err := backupGeneric(ctx, conf.Repositories.Generic, backupService)
+	err := backupGenericProfiles(ctx, conf.Profiles.GenericProfiles, backupService)
 	slog.InfoContext(ctx, "Backed up generic repositories")
 
 	slog.InfoContext(ctx, "Beginning to backup github repositories...")
-	err = errors.Join(err, backupGitHub(ctx, conf.Repositories.GitHub, backupService, readerService))
+	err = errors.Join(err, backupGitHubProfiles(ctx, conf.Profiles.GitHubProfiles, backupService, readerService))
 	slog.InfoContext(ctx, "Backed up github repositories")
 
 	return err
 }
 
-func backupGeneric(ctx context.Context, genericConf []config.GenericRepo, backupService BackupService) (backupErrors error) {
-	for _, profile := range genericConf {
+func backupGenericProfiles(ctx context.Context, genericProfiles []config.GenericProfile, backupService BackupService) (backupErrors error) {
+	for _, profile := range genericProfiles {
 		ctx := clog.Add(ctx, "profile", profile)
 		for _, target := range profile.Targets {
 			select {
@@ -47,7 +47,7 @@ func backupGeneric(ctx context.Context, genericConf []config.GenericRepo, backup
 			default:
 				targetPath := path.Join(profile.RootFolder, target.Folder)
 				ctx := clog.Add(ctx, "URL", target.URL, "Target folder", targetPath)
-				if err := backupService.Run(ctx, target.URL, targetPath); err != nil {
+				if err := backupService.Run(ctx, target.URL, targetPath, profile.PrivateSSHKey); err != nil {
 					slog.ErrorContext(ctx, "Failed to backup", "error", err)
 					backupErrors = errors.Join(backupErrors, fmt.Errorf("failed to backup repository %v from profile %v: %w", target.URL, profile.Name, err))
 				}
@@ -58,9 +58,10 @@ func backupGeneric(ctx context.Context, genericConf []config.GenericRepo, backup
 	return backupErrors
 }
 
-func backupGitHub(ctx context.Context, githubConf []config.GitHubRepo, backupService BackupService, readerService ReaderService) (backupErrors error) {
-	for _, profile := range githubConf {
+func backupGitHubProfiles(ctx context.Context, githubProfiles []config.GitHubProfile, backupService BackupService, readerService ReaderService) (backupErrors error) {
+	for _, profile := range githubProfiles {
 		ctx := clog.Add(ctx, "profile", profile)
+		privateSSHKey := profile.PrivateSSHKey
 		repos := include(
 			profile.Include,
 			exclude(
@@ -81,14 +82,24 @@ func backupGitHub(ctx context.Context, githubConf []config.GitHubRepo, backupSer
 			default:
 				ctx := clog.Add(ctx, "repo", repo.Name)
 
-				urlWithToken, err := addTokenToGithubURL(repo.CloneURL, profile.Token)
-				if err != nil {
-					slog.ErrorContext(ctx, "Failed to add token to URL", "error", err)
-					backupErrors = errors.Join(backupErrors, fmt.Errorf("failed to add token to clone URL %v from profile %v: %w", repo.CloneURL, profile.Name, err))
-					break
+				url := repo.GitURL
+				if privateSSHKey == nil {
+					var err error
+					url, err = addTokenToGithubURL(repo.CloneURL, profile.Token)
+					if err != nil {
+						slog.ErrorContext(ctx, "Failed to add token to URL", "error", err)
+						backupErrors = errors.Join(backupErrors, fmt.Errorf("failed to add token to clone URL %v from profile %v: %w", repo.CloneURL, profile.Name, err))
+						break
+					}
 				}
 
-				if err := backupService.Run(ctx, urlWithToken, path.Join(profile.RootFolder, repo.Owner, repo.Name)); err != nil {
+				err := backupService.Run(
+					ctx,
+					url,
+					path.Join(profile.RootFolder, repo.Owner, repo.Name),
+					privateSSHKey,
+				)
+				if err != nil {
 					slog.ErrorContext(ctx, "Failed to backup", "error", err)
 					backupErrors = errors.Join(backupErrors, fmt.Errorf("failed to backup repository %v from profile %v: %w", repo.CloneURL, profile.Name, err))
 				}
