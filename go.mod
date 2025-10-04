@@ -1,6 +1,6 @@
 module github.com/AntonKosov/git-backups
 
-go 1.24.4
+go 1.25.1
 
 tool (
 	github.com/maxbrunsfeld/counterfeiter/v6

@@ -3,7 +3,7 @@
     "build": {
         "dockerfile": "dockerfile",
         "args": {
-            "REBUILD_TRIGGER": "2025-08-02",
+            "REBUILD_TRIGGER": "2025-10-04",
             "USERNAME": "devuser"
         }
     },
