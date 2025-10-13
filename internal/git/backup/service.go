@@ -13,8 +13,6 @@ import (
 type Git interface {
 	Clone(ctx context.Context, url, path string, privateSSHKey *string) error
 	Fetch(ctx context.Context, path string, privateSSHKey *string) error
-	GetRemoteURL(ctx context.Context, path string) (string, error)
-	SetRemoteURL(ctx context.Context, path, url string) error
 }
 
 type Service struct {
@@ -33,25 +31,11 @@ func (s Service) Run(ctx context.Context, url, targetFolder string, privateSSHKe
 		return err
 	}
 
-	if !exists {
-		return s.git.Clone(ctx, url, targetFolder, privateSSHKey)
+	if exists {
+		return s.git.Fetch(ctx, targetFolder, privateSSHKey)
 	}
 
-	currentURL, err := s.git.GetRemoteURL(ctx, targetFolder)
-	if err != nil {
-		slog.ErrorContext(ctx, "Failed to check current remote URL", "error", err)
-		return err
-	}
-
-	if currentURL != url {
-		err := s.git.SetRemoteURL(ctx, targetFolder, url)
-		if err != nil {
-			slog.ErrorContext(ctx, "Failed to replace outdated remote URL", "error", err)
-			return err
-		}
-	}
-
-	return s.git.Fetch(ctx, targetFolder, privateSSHKey)
+	return s.git.Clone(ctx, url, targetFolder, privateSSHKey)
 }
 
 func folderExists(folder string) (bool, error) {

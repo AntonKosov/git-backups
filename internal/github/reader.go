@@ -14,10 +14,9 @@ const (
 )
 
 type Repo struct {
-	Name     string
-	Owner    string
-	CloneURL string
-	SSHURL   string
+	Name   string
+	Owner  string
+	SSHURL string
 }
 
 type jsonRepo struct {
@@ -43,7 +42,7 @@ func (r Reader) AllRepos(ctx context.Context, token, affiliation string) iter.Se
 			}
 
 			for _, repo := range repos {
-				if !yield(Repo{Name: repo.Name, Owner: repo.Owner.Login, CloneURL: repo.CloneURL, SSHURL: repo.SSHURL}, nil) {
+				if !yield(Repo{Name: repo.Name, Owner: repo.Owner.Login, SSHURL: repo.SSHURL}, nil) {
 					return
 				}
 			}
