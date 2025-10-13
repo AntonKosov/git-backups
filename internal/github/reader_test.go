@@ -33,22 +33,19 @@ var _ = Describe("Reader tests", func() {
 		repos := maps.Collect(allRepos)
 		Expect(repos).To(Equal(map[github.Repo]error{
 			{
-				Name:     "Repo1Name",
-				Owner:    "User",
-				CloneURL: "https://Repo1Url.com",
-				SSHURL:   "git:github.com/repo-owner1/hello-world.git",
+				Name:   "Repo1Name",
+				Owner:  "User",
+				SSHURL: "git:github.com/repo-owner1/hello-world.git",
 			}: nil,
 			{
-				Name:     "Repo2Name",
-				Owner:    "User",
-				CloneURL: "https://Repo2Url.com",
-				SSHURL:   "git:github.com/repo-owner2/hello-world.git",
+				Name:   "Repo2Name",
+				Owner:  "User",
+				SSHURL: "git:github.com/repo-owner2/hello-world.git",
 			}: nil,
 			{
-				Name:     "Repo3Name",
-				Owner:    "User",
-				CloneURL: "https://Repo3Url.com",
-				SSHURL:   "git:github.com/repo-owner3/hello-world.git",
+				Name:   "Repo3Name",
+				Owner:  "User",
+				SSHURL: "git:github.com/repo-owner3/hello-world.git",
 			}: nil,
 		}))
 	})
@@ -96,10 +93,9 @@ var _ = Describe("Reader tests", func() {
 			for repo, err := range allRepos {
 				Expect(err).NotTo(HaveOccurred())
 				Expect(repo).To(Equal(github.Repo{
-					Name:     fmt.Sprintf("Repo%vName", i),
-					Owner:    "User",
-					CloneURL: fmt.Sprintf("https://Repo%vUrl.com", i),
-					SSHURL:   fmt.Sprintf("git:github.com/repo-owner%v/hello-world.git", i),
+					Name:   fmt.Sprintf("Repo%vName", i),
+					Owner:  "User",
+					SSHURL: fmt.Sprintf("git:github.com/repo-owner%v/hello-world.git", i),
 				}))
 
 				i++

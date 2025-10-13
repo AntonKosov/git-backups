@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
-	"strings"
 
 	"github.com/AntonKosov/git-backups/internal/clog"
 	"github.com/AntonKosov/git-backups/internal/cmd"
@@ -51,32 +50,10 @@ func (g Git) Fetch(ctx context.Context, path string, privateSSHKey *string) erro
 	return nil
 }
 
-func (g Git) GetRemoteURL(ctx context.Context, path string) (string, error) {
-	var url strings.Builder
-	err := cmd.Execute(
-		ctx,
-		"git",
-		cmd.WithArguments("-C", path, "remote", "get-url", "origin"),
-		cmd.WithStdoutWriter(&url),
-	)
-
-	return strings.Trim(url.String(), " \n"), err
-}
-
-func (g Git) SetRemoteURL(ctx context.Context, path, url string) error {
-	err := cmd.Execute(
-		ctx,
-		"git",
-		cmd.WithArguments("-C", path, "remote", "set-url", "origin", url),
-	)
-
-	return err
-}
-
 func argumentsWithSSHKey(privateSSHKey *string, otherArgs ...string) cmd.Option {
 	if privateSSHKey != nil {
 		sshCommand := fmt.Sprintf(
-			`core.sshCommand=ssh -i "%v" -o IdentitiesOnly=yes -o StrictHostKeyChecking=no`,
+			`core.sshCommand=ssh -i "%v" -o IdentitiesOnly=yes`,
 			*privateSSHKey,
 		)
 		otherArgs = append([]string{"-c", sshCommand}, otherArgs...)

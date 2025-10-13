@@ -125,10 +125,9 @@ var _ = Describe("Launcher tests", func() {
 		}
 		ghRepo := func(owner, repoName string) github.Repo {
 			return github.Repo{
-				Name:     repoName,
-				Owner:    owner,
-				CloneURL: fmt.Sprintf("https://github.com/%v/%v.git", owner, repoName),
-				SSHURL:   fmt.Sprintf("git:github.com/%v/%v.git", owner, repoName),
+				Name:   repoName,
+				Owner:  owner,
+				SSHURL: fmt.Sprintf("git:github.com/%v/%v.git", owner, repoName),
 			}
 		}
 		setReturnCall(0, []github.Repo{
@@ -167,12 +166,12 @@ var _ = Describe("Launcher tests", func() {
 		verifyCall(1, "https://github.com/Username2/repo_name_2.git", "/home/user/git_backup/folder_name/repo_folder_name_2", nil)
 		verifyCall(2, "https://github.com/Username3/repo_name_3.git", "/home/user/git_backup/folder_name_2/repo_folder_name_3", nil)
 		verifyCall(3, "https://github.com/Username4/repo_name_4.git", "/home/user/git_backup/folder_name_2/repo_folder_name_4", nil)
-		verifyCall(4, "https://oauth2:GH_XXX@github.com/GH_Username1/repo_name_1.git", "/home/user/git_backup/folder_name_3/GH_Username1/repo_name_1", nil)
-		verifyCall(5, "https://oauth2:GH_XXX@github.com/GH_Username1/repo_name_2.git", "/home/user/git_backup/folder_name_3/GH_Username1/repo_name_2", nil)
-		verifyCall(6, "https://oauth2:GH2_XXX@github.com/GH_Username2/repo_name_4.git", "/home/user/git_backup/folder_name_4/GH_Username2/repo_name_4", nil)
-		verifyCall(7, "https://oauth2:GH2_XXX@github.com/GH_Username2/repo_name_5.git", "/home/user/git_backup/folder_name_4/GH_Username2/repo_name_5", nil)
-		verifyCall(8, "https://oauth2:GH3_XXX@github.com/GH_Username3/repo_name_7.git", "/home/user/git_backup/folder_name_5/GH_Username3/repo_name_7", nil)
-		verifyCall(9, "https://oauth2:GH4_XXX@github.com/GH_Username4/repo_name_9.git", "/home/user/git_backup/folder_name_6/GH_Username4/repo_name_9", nil)
+		verifyCall(4, "git:github.com/GH_Username1/repo_name_1.git", "/home/user/git_backup/folder_name_3/GH_Username1/repo_name_1", nil)
+		verifyCall(5, "git:github.com/GH_Username1/repo_name_2.git", "/home/user/git_backup/folder_name_3/GH_Username1/repo_name_2", nil)
+		verifyCall(6, "git:github.com/GH_Username2/repo_name_4.git", "/home/user/git_backup/folder_name_4/GH_Username2/repo_name_4", nil)
+		verifyCall(7, "git:github.com/GH_Username2/repo_name_5.git", "/home/user/git_backup/folder_name_4/GH_Username2/repo_name_5", nil)
+		verifyCall(8, "git:github.com/GH_Username3/repo_name_7.git", "/home/user/git_backup/folder_name_5/GH_Username3/repo_name_7", nil)
+		verifyCall(9, "git:github.com/GH_Username4/repo_name_9.git", "/home/user/git_backup/folder_name_6/GH_Username4/repo_name_9", nil)
 	})
 
 	When("generic backup service returns an error", func() {
@@ -185,12 +184,12 @@ var _ = Describe("Launcher tests", func() {
 			Expect(err.Error()).To(ContainSubstring("failed to backup repository https://github.com/Username2/repo_name_2.git from profile profile name: something went wrong"))
 			Expect(err.Error()).To(ContainSubstring("failed to backup repository https://github.com/Username3/repo_name_3.git from profile profile name 2: something went wrong"))
 			Expect(err.Error()).To(ContainSubstring("failed to backup repository https://github.com/Username4/repo_name_4.git from profile profile name 2: something went wrong"))
-			Expect(err.Error()).To(ContainSubstring("failed to backup repository https://github.com/GH_Username1/repo_name_1.git from profile profile name 3: something went wrong"))
-			Expect(err.Error()).To(ContainSubstring("failed to backup repository https://github.com/GH_Username1/repo_name_2.git from profile profile name 3: something went wrong"))
-			Expect(err.Error()).To(ContainSubstring("failed to backup repository https://github.com/GH_Username2/repo_name_4.git from profile profile name 4: something went wrong"))
-			Expect(err.Error()).To(ContainSubstring("failed to backup repository https://github.com/GH_Username2/repo_name_5.git from profile profile name 4: something went wrong"))
-			Expect(err.Error()).To(ContainSubstring("failed to backup repository https://github.com/GH_Username3/repo_name_7.git from profile profile name 5: something went wrong"))
-			Expect(err.Error()).To(ContainSubstring("failed to backup repository https://github.com/GH_Username4/repo_name_9.git from profile profile name 6: something went wrong"))
+			Expect(err.Error()).To(ContainSubstring("failed to backup repository git:github.com/GH_Username1/repo_name_1.git from profile profile name 3: something went wrong"))
+			Expect(err.Error()).To(ContainSubstring("failed to backup repository git:github.com/GH_Username1/repo_name_2.git from profile profile name 3: something went wrong"))
+			Expect(err.Error()).To(ContainSubstring("failed to backup repository git:github.com/GH_Username2/repo_name_4.git from profile profile name 4: something went wrong"))
+			Expect(err.Error()).To(ContainSubstring("failed to backup repository git:github.com/GH_Username2/repo_name_5.git from profile profile name 4: something went wrong"))
+			Expect(err.Error()).To(ContainSubstring("failed to backup repository git:github.com/GH_Username3/repo_name_7.git from profile profile name 5: something went wrong"))
+			Expect(err.Error()).To(ContainSubstring("failed to backup repository git:github.com/GH_Username4/repo_name_9.git from profile profile name 6: something went wrong"))
 		})
 	})
 
@@ -206,29 +205,13 @@ var _ = Describe("Launcher tests", func() {
 		})
 	})
 
-	When("incorrect clone URL is given", func() {
-		BeforeEach(func() {
-			fakeReaderService.AllReposReturnsOnCall(0, func(yield func(github.Repo, error) bool) {
-				yield(github.Repo{
-					Name:     "repo_name_1",
-					Owner:    "GH_Username1",
-					CloneURL: "not_https://github.com/GH_Username1/repo_name_1.git",
-				}, nil)
-			})
-		})
-
-		It("returns an error", func() {
-			Expect(err.Error()).To(ContainSubstring("failed to add token to clone URL not_https://github.com/GH_Username1/repo_name_1.git from profile profile name 3: unexpected URL prefix"))
-		})
-	})
-
 	When("GitHub backup service returns an error", func() {
 		BeforeEach(func() {
 			fakeBackupService.RunReturnsOnCall(4, errors.New("something went wrong"))
 		})
 
 		It("returns an error", func() {
-			Expect(err.Error()).To(ContainSubstring("failed to backup repository https://github.com/GH_Username1/repo_name_1.git from profile profile name 3: something went wrong"))
+			Expect(err.Error()).To(ContainSubstring("failed to backup repository git:github.com/GH_Username1/repo_name_1.git from profile profile name 3: something went wrong"))
 		})
 	})
 
@@ -260,10 +243,10 @@ var _ = Describe("Launcher tests", func() {
 			verifyCall(3, "git:github.com/Username4/repo_name_4.git", "/home/user/git_backup/folder_name_2/repo_folder_name_4", &key1)
 			verifyCall(4, "git:github.com/GH_Username1/repo_name_1.git", "/home/user/git_backup/folder_name_3/GH_Username1/repo_name_1", &key2)
 			verifyCall(5, "git:github.com/GH_Username1/repo_name_2.git", "/home/user/git_backup/folder_name_3/GH_Username1/repo_name_2", &key2)
-			verifyCall(6, "https://oauth2:GH2_XXX@github.com/GH_Username2/repo_name_4.git", "/home/user/git_backup/folder_name_4/GH_Username2/repo_name_4", nil)
-			verifyCall(7, "https://oauth2:GH2_XXX@github.com/GH_Username2/repo_name_5.git", "/home/user/git_backup/folder_name_4/GH_Username2/repo_name_5", nil)
-			verifyCall(8, "https://oauth2:GH3_XXX@github.com/GH_Username3/repo_name_7.git", "/home/user/git_backup/folder_name_5/GH_Username3/repo_name_7", nil)
-			verifyCall(9, "https://oauth2:GH4_XXX@github.com/GH_Username4/repo_name_9.git", "/home/user/git_backup/folder_name_6/GH_Username4/repo_name_9", nil)
+			verifyCall(6, "git:github.com/GH_Username2/repo_name_4.git", "/home/user/git_backup/folder_name_4/GH_Username2/repo_name_4", nil)
+			verifyCall(7, "git:github.com/GH_Username2/repo_name_5.git", "/home/user/git_backup/folder_name_4/GH_Username2/repo_name_5", nil)
+			verifyCall(8, "git:github.com/GH_Username3/repo_name_7.git", "/home/user/git_backup/folder_name_5/GH_Username3/repo_name_7", nil)
+			verifyCall(9, "git:github.com/GH_Username4/repo_name_9.git", "/home/user/git_backup/folder_name_6/GH_Username4/repo_name_9", nil)
 		})
 	})
 
@@ -278,7 +261,7 @@ var _ = Describe("Launcher tests", func() {
 
 		It("includes the repo", func() {
 			_, url, path, privateSSHKey := fakeBackupService.RunArgsForCall(4)
-			Expect(url).To(Equal("https://oauth2:GH_XXX@github.com/GH_Username1/repo_name_1.git"))
+			Expect(url).To(Equal("git:github.com/GH_Username1/repo_name_1.git"))
 			Expect(path).To(Equal("/home/user/git_backup/folder_name_3/GH_Username1/repo_name_1"))
 			Expect(privateSSHKey).To(BeNil())
 		})
@@ -295,7 +278,7 @@ var _ = Describe("Launcher tests", func() {
 
 		It("does not include the repo", func() {
 			_, url, path, privateSSHKey := fakeBackupService.RunArgsForCall(6)
-			Expect(url).To(Equal("https://oauth2:GH2_XXX@github.com/GH_Username2/repo_name_4.git"))
+			Expect(url).To(Equal("git:github.com/GH_Username2/repo_name_4.git"))
 			Expect(path).To(Equal("/home/user/git_backup/folder_name_4/GH_Username2/repo_name_4"))
 			Expect(privateSSHKey).To(BeNil())
 		})
@@ -313,7 +296,7 @@ var _ = Describe("Launcher tests", func() {
 		It("does not clone repositories from the first GitHub profile", func() {
 			Expect(fakeBackupService.RunCallCount()).To(Equal(8))
 			_, url, path, privateSSHKey := fakeBackupService.RunArgsForCall(4)
-			Expect(url).To(Equal("https://oauth2:GH2_XXX@github.com/GH_Username2/repo_name_4.git"))
+			Expect(url).To(Equal("git:github.com/GH_Username2/repo_name_4.git"))
 			Expect(path).To(Equal("/home/user/git_backup/folder_name_4/GH_Username2/repo_name_4"))
 			Expect(privateSSHKey).To(BeNil())
 		})

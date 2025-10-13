@@ -61,7 +61,6 @@ func backupGenericProfiles(ctx context.Context, genericProfiles []config.Generic
 func backupGitHubProfiles(ctx context.Context, githubProfiles []config.GitHubProfile, backupService BackupService, readerService ReaderService) (backupErrors error) {
 	for _, profile := range githubProfiles {
 		ctx := clog.Add(ctx, "profile", profile.Name)
-		privateSSHKey := profile.PrivateSSHKey
 		repos := include(
 			profile.Include,
 			exclude(
@@ -82,26 +81,15 @@ func backupGitHubProfiles(ctx context.Context, githubProfiles []config.GitHubPro
 			default:
 				ctx := clog.Add(ctx, "repo", repo.Name)
 
-				url := repo.SSHURL
-				if privateSSHKey == nil {
-					var err error
-					url, err = addTokenToGithubURL(repo.CloneURL, profile.Token)
-					if err != nil {
-						slog.ErrorContext(ctx, "Failed to add token to URL", "error", err)
-						backupErrors = errors.Join(backupErrors, fmt.Errorf("failed to add token to clone URL %v from profile %v: %w", repo.CloneURL, profile.Name, err))
-						break
-					}
-				}
-
 				err := backupService.Run(
 					ctx,
-					url,
+					repo.SSHURL,
 					path.Join(profile.RootFolder, repo.Owner, repo.Name),
-					privateSSHKey,
+					profile.PrivateSSHKey,
 				)
 				if err != nil {
 					slog.ErrorContext(ctx, "Failed to backup", "error", err)
-					backupErrors = errors.Join(backupErrors, fmt.Errorf("failed to backup repository %v from profile %v: %w", repo.CloneURL, profile.Name, err))
+					backupErrors = errors.Join(backupErrors, fmt.Errorf("failed to backup repository %v from profile %v: %w", repo.SSHURL, profile.Name, err))
 				}
 			}
 		}
@@ -157,12 +145,4 @@ func exclude(toExclude []string, repos iter.Seq2[github.Repo, error]) iter.Seq2[
 			}
 		}
 	}
-}
-
-func addTokenToGithubURL(url, token string) (string, error) {
-	if !strings.HasPrefix(url, "https://") {
-		return "", errors.New("unexpected URL prefix")
-	}
-
-	return fmt.Sprintf("https://oauth2:%v@%v", token, url[8:]), nil
 }
