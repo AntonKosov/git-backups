@@ -43,34 +43,34 @@ For GitHub profiles, you'll need a personal access token with `repo` scope. The 
 version: 1
 
 profiles:
-    # Generic repositories - supports multiple profiles
-    generic:
-        - profile: "GitLab"
-            # Backup destination directory
-            root_folder: "/app/backup/gitlab"
-            # Optional: Private SSH key for authentication
-            private_ssh_key: "/app/ssh_key"
-            # Repository list with custom folder names
-            targets:
-                - url: "git@gitlab.com:Username1/repo_name_1.git"
-                    folder: "repo_name_1"
-                - url: "git@gitlab.com:Username2/repo_name_2.git"
-                    folder: "repo_name_2"
+  # Generic repositories - supports multiple profiles
+  generic:
+    - profile: "GitLab"
+      # Backup destination directory
+      root_folder: "/app/backup/gitlab"
+      # Optional: Private SSH key for authentication
+      private_ssh_key: "/app/ssh_key"
+      # Repository list with custom folder names
+      targets:
+        - url: "git@gitlab.com:Username1/repo_name_1.git"
+          folder: "repo_name_1"
+        - url: "git@gitlab.com:Username2/repo_name_2.git"
+          folder: "repo_name_2"
 
-    # GitHub repositories - supports multiple profiles  
-    github:
-        - profile: "GitHub Personal"
-            root_folder: "/app/backup/github"
-            # Repository ownership filter (at least one required)
-            affiliation: "owner,collaborator,organization_member"
-            # GitHub personal access token with "repo" scope
-            token: "ghp_XXX"
-            # Optional: Private SSH key for git operations
-            private_ssh_key: "/app/ssh_key"
-            # Optional: Only backup specific repositories
-            # include: ["repo_name_1", "repo_name_2"]
-            # Optional: Exclude specific repositories (overrides include)
-            # exclude: ["repo_name_3"]
+  # GitHub repositories - supports multiple profiles  
+  github:
+    - profile: "GitHub Personal"
+      root_folder: "/app/backup/github"
+      # Repository ownership filter (at least one required)
+      affiliation: "owner,collaborator,organization_member"
+      # GitHub personal access token with "repo" scope
+      token: "ghp_XXX"
+      # Optional: Private SSH key for git operations
+      private_ssh_key: "/app/ssh_key"
+      # Optional: Only backup specific repositories
+      # include: ["repo_name_1", "repo_name_2"]
+      # Optional: Exclude specific repositories (overrides include)
+      # exclude: ["repo_name_3"]
 ```
 
 ### Docker Usage
