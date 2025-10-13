@@ -9,6 +9,8 @@ RUN CGO_ENABLED=0 go build -ldflags="-w -s" -o git-backups ./cmd/git-backups
 
 FROM alpine:latest
 
+RUN apk add --no-cache git openssh-client
+
 WORKDIR /app
 
 COPY --from=builder /app/git-backups .

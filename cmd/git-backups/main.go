@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"log/slog"
 	"os"
 	"os/signal"
@@ -16,10 +17,20 @@ import (
 )
 
 func main() {
-	h := clog.NewHandler(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
-	slog.SetDefault(slog.New(h))
+	debug := flag.Bool("debug", false, "enable debug logging")
+	flag.Parse()
+
+	logLevel := slog.LevelInfo
+	if *debug {
+		logLevel = slog.LevelDebug
+	}
+
+	logHandler := clog.NewHandler(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: logLevel}))
+	slog.SetDefault(slog.New(logHandler))
+
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+
 	termSig := make(chan os.Signal, 1)
 	signal.Notify(termSig, syscall.SIGINT, syscall.SIGTERM)
 	go func() {

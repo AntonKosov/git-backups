@@ -128,7 +128,7 @@ var _ = Describe("Launcher tests", func() {
 				Name:     repoName,
 				Owner:    owner,
 				CloneURL: fmt.Sprintf("https://github.com/%v/%v.git", owner, repoName),
-				GitURL:   fmt.Sprintf("git:github.com/%v/%v.git", owner, repoName),
+				SSHURL:   fmt.Sprintf("git:github.com/%v/%v.git", owner, repoName),
 			}
 		}
 		setReturnCall(0, []github.Repo{

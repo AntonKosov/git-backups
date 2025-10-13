@@ -24,7 +24,6 @@ func (ce CommandError) Error() string {
 
 type Options struct {
 	args         []string
-	envVariables []string
 	stdoutWriter io.Writer
 }
 
@@ -33,12 +32,6 @@ type Option func(*Options)
 func WithArguments(args ...string) Option {
 	return func(o *Options) {
 		o.args = args
-	}
-}
-
-func WithEnvVariables(envVariables ...string) Option {
-	return func(o *Options) {
-		o.envVariables = envVariables
 	}
 }
 
@@ -51,9 +44,7 @@ func WithStdoutWriter(writer io.Writer) Option {
 func Execute(ctx context.Context, name string, opts ...Option) error {
 	var options Options
 	for _, opt := range opts {
-		if opt != nil {
-			opt(&options)
-		}
+		opt(&options)
 	}
 
 	args := options.args
@@ -67,8 +58,6 @@ func Execute(ctx context.Context, name string, opts ...Option) error {
 	if w := options.stdoutWriter; w != nil {
 		command.Stdout = w
 	}
-
-	command.Env = options.envVariables
 
 	if err := command.Run(); err != nil {
 		err = errors.Join(err, CommandError{Name: name, Args: args, Err: stderr.String()})
