@@ -14,14 +14,13 @@ type Git struct {
 }
 
 func (g Git) Clone(ctx context.Context, url, path string, privateSSHKey *string) error {
-	ctx = clog.Add(ctx, "URL", url, "path", path)
+	ctx = clog.Add(ctx, "path", path)
 	slog.InfoContext(ctx, "Cloning repository...")
 
 	err := cmd.Execute(
 		ctx,
 		"git",
-		cmd.WithArguments("clone", "--bare", url, path),
-		sshKeyEnvVariableCommandOption(privateSSHKey),
+		argumentsWithSSHKey(privateSSHKey, "clone", "--bare", url, path),
 	)
 	if err != nil {
 		slog.ErrorContext(ctx, "Failed to clone", "error", err.Error())
@@ -40,8 +39,7 @@ func (g Git) Fetch(ctx context.Context, path string, privateSSHKey *string) erro
 	err := cmd.Execute(
 		ctx,
 		"git",
-		cmd.WithArguments("-C", path, "--bare", "fetch"),
-		sshKeyEnvVariableCommandOption(privateSSHKey),
+		argumentsWithSSHKey(privateSSHKey, "-C", path, "--bare", "fetch"),
 	)
 	if err != nil {
 		slog.ErrorContext(ctx, "Failed to fetch", "error", err.Error())
@@ -75,12 +73,14 @@ func (g Git) SetRemoteURL(ctx context.Context, path, url string) error {
 	return err
 }
 
-func sshKeyEnvVariableCommandOption(privateSSHKey *string) cmd.Option {
-	if privateSSHKey == nil {
-		return nil
+func argumentsWithSSHKey(privateSSHKey *string, otherArgs ...string) cmd.Option {
+	if privateSSHKey != nil {
+		sshCommand := fmt.Sprintf(
+			`core.sshCommand=ssh -i "%v" -o IdentitiesOnly=yes -o StrictHostKeyChecking=no`,
+			*privateSSHKey,
+		)
+		otherArgs = append([]string{"-c", sshCommand}, otherArgs...)
 	}
 
-	return cmd.WithEnvVariables(
-		fmt.Sprintf(`GIT_SSH_COMMAND="ssh -i %v -o IdentitiesOnly=yes"`, *privateSSHKey),
-	)
+	return cmd.WithArguments(otherArgs...)
 }

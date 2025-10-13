@@ -46,7 +46,7 @@ func backupGenericProfiles(ctx context.Context, genericProfiles []config.Generic
 				return errors.Join(backupErrors, context.Canceled)
 			default:
 				targetPath := path.Join(profile.RootFolder, target.Folder)
-				ctx := clog.Add(ctx, "URL", target.URL, "Target folder", targetPath)
+				ctx := clog.Add(ctx, "Target folder", targetPath)
 				if err := backupService.Run(ctx, target.URL, targetPath, profile.PrivateSSHKey); err != nil {
 					slog.ErrorContext(ctx, "Failed to backup", "error", err)
 					backupErrors = errors.Join(backupErrors, fmt.Errorf("failed to backup repository %v from profile %v: %w", target.URL, profile.Name, err))
@@ -60,7 +60,7 @@ func backupGenericProfiles(ctx context.Context, genericProfiles []config.Generic
 
 func backupGitHubProfiles(ctx context.Context, githubProfiles []config.GitHubProfile, backupService BackupService, readerService ReaderService) (backupErrors error) {
 	for _, profile := range githubProfiles {
-		ctx := clog.Add(ctx, "profile", profile)
+		ctx := clog.Add(ctx, "profile", profile.Name)
 		privateSSHKey := profile.PrivateSSHKey
 		repos := include(
 			profile.Include,
@@ -82,7 +82,7 @@ func backupGitHubProfiles(ctx context.Context, githubProfiles []config.GitHubPro
 			default:
 				ctx := clog.Add(ctx, "repo", repo.Name)
 
-				url := repo.GitURL
+				url := repo.SSHURL
 				if privateSSHKey == nil {
 					var err error
 					url, err = addTokenToGithubURL(repo.CloneURL, profile.Token)

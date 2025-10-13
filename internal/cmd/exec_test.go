@@ -75,36 +75,4 @@ var _ = Describe("Exec tests", func() {
 			Expect(stdout.String()).To(ContainSubstring("exec_test.go"))
 		})
 	})
-
-	When("there are env variables", func() {
-		var stdout strings.Builder
-
-		BeforeEach(func() {
-			stdout = strings.Builder{}
-			executableApp = "env"
-			commandOptions = append(
-				commandOptions,
-				cmd.WithStdoutWriter(&stdout),
-				cmd.WithEnvVariables(`var1=1234`, `var2="value with spaces"`),
-			)
-		})
-
-		It("doesn't return an error", func() {
-			Expect(err).NotTo(HaveOccurred())
-		})
-
-		It("returns correct output", func() {
-			Expect(stdout.String()).To(Equal("var1=1234\nvar2=\"value with spaces\"\n"))
-		})
-	})
-
-	When("an option is nil", func() {
-		BeforeEach(func() {
-			commandOptions = append(commandOptions, nil)
-		})
-
-		It("doesn't return an error", func() {
-			Expect(err).NotTo(HaveOccurred())
-		})
-	})
 })

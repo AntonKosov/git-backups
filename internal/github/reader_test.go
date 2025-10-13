@@ -36,19 +36,19 @@ var _ = Describe("Reader tests", func() {
 				Name:     "Repo1Name",
 				Owner:    "User",
 				CloneURL: "https://Repo1Url.com",
-				GitURL:   "git:github.com/repo-owner1/hello-world.git",
+				SSHURL:   "git:github.com/repo-owner1/hello-world.git",
 			}: nil,
 			{
 				Name:     "Repo2Name",
 				Owner:    "User",
 				CloneURL: "https://Repo2Url.com",
-				GitURL:   "git:github.com/repo-owner2/hello-world.git",
+				SSHURL:   "git:github.com/repo-owner2/hello-world.git",
 			}: nil,
 			{
 				Name:     "Repo3Name",
 				Owner:    "User",
 				CloneURL: "https://Repo3Url.com",
-				GitURL:   "git:github.com/repo-owner3/hello-world.git",
+				SSHURL:   "git:github.com/repo-owner3/hello-world.git",
 			}: nil,
 		}))
 	})
@@ -99,7 +99,7 @@ var _ = Describe("Reader tests", func() {
 					Name:     fmt.Sprintf("Repo%vName", i),
 					Owner:    "User",
 					CloneURL: fmt.Sprintf("https://Repo%vUrl.com", i),
-					GitURL:   fmt.Sprintf("git:github.com/repo-owner%v/hello-world.git", i),
+					SSHURL:   fmt.Sprintf("git:github.com/repo-owner%v/hello-world.git", i),
 				}))
 
 				i++
@@ -124,7 +124,7 @@ func generateResponseJSON(first, last int) string {
 			"name": "Repo%[1]vName",
 			"owner": {"login": "User"},
 			"clone_url": "https://Repo%[1]vUrl.com",
-			"git_url": "git:github.com/repo-owner%[1]v/hello-world.git"
+			"ssh_url": "git:github.com/repo-owner%[1]v/hello-world.git"
 		}`, i))
 	}
 

@@ -26,7 +26,7 @@ func NewService(git Git) Service {
 }
 
 func (s Service) Run(ctx context.Context, url, targetFolder string, privateSSHKey *string) error {
-	ctx = clog.Add(ctx, "URL", url, "target folder", targetFolder)
+	ctx = clog.Add(ctx, "target folder", targetFolder)
 	exists, err := folderExists(targetFolder)
 	if err != nil {
 		slog.ErrorContext(ctx, "Failed to check folder", "error", err)
